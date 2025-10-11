@@ -6,6 +6,12 @@
 #include "ui/ui.h"
 #include "moonraker.h"
 #include "ui_overlay/lv_overlay.h"
+#include "fs_gif_loader.h"  // ← NEU!
+
+// ========================================================================
+// GLOBAL: GIF-Objekt für Main Screen (OHNE static!)
+// ========================================================================
+lv_obj_t * ui_img_main_gif;  // ← NEU!
 
 
 /****************** lvgl ui call function ******************/
@@ -73,10 +79,19 @@ void lvgl_ui_task(void * parameter) {
     // Set theme color
     lv_theme_color_style();
 
-    // Add logo gif
+    / ========================================================================
+    // GIF-Objekt erstellen & LittleFS Mount
+    // ========================================================================
     ui_img_main_gif = lv_gif_create(ui_ScreenMainGif);
-    lv_gif_set_src(ui_img_main_gif, gif_idle[0]);
     lv_obj_align(ui_img_main_gif, LV_ALIGN_CENTER, 0, 0);
+    
+    // LittleFS einmalig mounten
+    fs_mount_once();
+    
+    // Initial Tool-GIF aus LittleFS laden (statt gif_idle[0])
+    fs_set_tool_gif(ui_img_main_gif, detect_my_tool_number());
+
+    // Add logo gif
 
     // Add welcome gif
     lv_obj_t * img_welcome_gif = lv_gif_create(ui_ScreenWelcome);
