@@ -2,6 +2,8 @@
 #include "knomi.h"
 #include "lv_overlay.h"
 #include "moonraker.h"
+#include "fs_gif_loader.h"
+#include "../power_management/display_sleep.h"  // ← NEU: Display Sleep Management
 
 static uint32_t touch_idle_sec = 0;
 
@@ -11,6 +13,19 @@ void touch_idle_time_clear(void) {
 
 #define GOT_IDLE_SECS 60  // 60s
 void lv_loop_auto_idle(wifi_status_t status) {
+    // ========================================================================
+    // NEW: Display Sleep Management
+    // ========================================================================
+    display_sleep_update();  // Checks sleep timer and performs sleep/wake
+
+    // If display is sleeping, no further UI actions
+    if (display_is_sleeping()) {
+        return;
+    }
+
+    // ========================================================================
+    // Existing idle system (unchanged)
+    // ========================================================================
     lv_obj_t * ui_now = lv_scr_act();
     if ((ui_now == ui_ScreenMainGif) || (ui_now == ui_ScreenPopup)
          || (ui_now == ui_ScreenHeatingNozzle) || (ui_now == ui_ScreenHeatingBed)
@@ -25,7 +40,8 @@ void lv_loop_auto_idle(wifi_status_t status) {
     touch_idle_sec++;
 
     if (touch_idle_sec >= GOT_IDLE_SECS) {
-        lv_gif_set_src(ui_img_main_gif, gif_idle[0]);
+        // Tool-GIF aus LittleFS laden statt gif_idle[0]
+        fs_set_tool_gif(ui_img_main_gif, detect_my_tool_number());
         lv_obj_add_flag(ui_ScreenMainGif, LV_OBJ_FLAG_CLICKABLE);
         _ui_screen_change(&ui_ScreenMainGif, LV_SCR_LOAD_ANIM_NONE, 500, 0, NULL);
         touch_idle_sec = 0;

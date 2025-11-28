@@ -52,12 +52,14 @@ SET(SOURCES components/ui_comp_label2.c
     images/ui_img_btn_cancel_png.c
     images/ui_img_popup_png.c
     images/ui_img_test_png.c
+    images/ui_img_progress_ring.c
     fonts/ui_font_InterSeimiBold32.c
     fonts/ui_font_InterSemiBold14.c
     fonts/ui_font_InterSemiBold16.c
     fonts/ui_font_InterSemiBold18.c
     fonts/ui_font_InterSemiBold20.c
     fonts/ui_font_InterSemiBold24.c
+    fonts/ui_font_InterSemiBold28.c
     fonts/ui_font_InterSemiBold48.c)
 
 add_library(ui ${SOURCES})

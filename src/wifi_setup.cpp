@@ -72,13 +72,13 @@ void eeprom_init(void) {
         Serial.print("sta_ssid: ");
         Serial.println(knomi_config.sta_ssid);
         Serial.print("sta_pwd: ");
-        Serial.println(knomi_config.sta_pwd);
+        Serial.println("********");  // Password masked for security
         Serial.print("sta_auth: ");
         Serial.println(knomi_config.sta_auth);
         Serial.print("ap_ssid: ");
         Serial.println(knomi_config.ap_ssid);
         Serial.print("ap_pwd: ");
-        Serial.println(knomi_config.ap_pwd);
+        Serial.println("********");  // Password masked for security
         Serial.print("hostname: ");
         Serial.println(knomi_config.hostname);
         Serial.print("moonraker_ip: ");
@@ -164,13 +164,13 @@ void eeprom_write_knomi_config(void) {
     Serial.print("sta_ssid: ");
     Serial.println(knomi_config.sta_ssid);
     Serial.print("sta_pwd: ");
-    Serial.println(knomi_config.sta_pwd);
+    Serial.println("********");  // Password masked for security
     Serial.print("sta_auth: ");
     Serial.println(knomi_config.sta_auth);
     Serial.print("ap_ssid: ");
     Serial.println(knomi_config.ap_ssid);
     Serial.print("ap_pwd: ");
-    Serial.println(knomi_config.ap_pwd);
+    Serial.println("********");  // Password masked for security
     Serial.print("hostname: ");
     Serial.println(knomi_config.hostname);
     Serial.print("moonraker_ip: ");
@@ -246,7 +246,7 @@ restart:
             Serial.print("ap ssid: ");
             Serial.println(knomi_config.ap_ssid);
             Serial.print("ap pwd: ");
-            Serial.println(knomi_config.ap_pwd);
+            Serial.println("********");  // Password masked for security
             WiFi.softAPConfig(ap_local_ip, ap_gateway, ap_subnet);
             if (WiFi.softAP(knomi_config.ap_ssid, knomi_config.ap_pwd)) {
                 Serial.print("ap ip: ");
@@ -274,7 +274,7 @@ restart:
             Serial.print("sta ssid: ");
             Serial.println(knomi_config.sta_ssid);
             Serial.print("sta pwd: ");
-            Serial.println(knomi_config.sta_pwd);
+            Serial.println("********");  // Password masked for security
             WiFi.setMinSecurity(knomi_config.sta_auth);
             wl_status_t n = WiFi.begin(knomi_config.sta_ssid, knomi_config.sta_pwd);  /*Connecting to Defined Access point*/
             wifi_status = WIFI_STATUS_CONNECTING;

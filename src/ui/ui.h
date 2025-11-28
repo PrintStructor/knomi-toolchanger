@@ -108,18 +108,26 @@ extern lv_obj_t * ui_img_set_extrude_ok;
 void ui_ScreenPrinting_screen_init(void);
 void ui_event_ScreenPrinting(lv_event_t * e);
 extern lv_obj_t * ui_ScreenPrinting;
-extern lv_obj_t * ui_label_printing_progress;
-extern lv_obj_t * ui_arc_printing_progress;
+extern lv_obj_t * ui_gif_print_progress_bg;      // Animated GIF background
+extern lv_obj_t * ui_arc_progress_cover;         // Schwarzer Cover-Arc
+extern lv_obj_t * ui_label_printing_progress;    // Progress % Label
+extern lv_obj_t * ui_label_progress_eta;         // ETA Label
+extern lv_obj_t * ui_label_progress_layer;       // Layer Info Label
 extern lv_obj_t * ui_slider_printing_acc_x;
 extern lv_obj_t * ui_label_printing_acc_x;
 extern lv_obj_t * ui_slider_printing_acc_y;
 extern lv_obj_t * ui_label_printing_acc_y;
 extern lv_obj_t * ui_slider_printing_acc_z;
 extern lv_obj_t * ui_label_printing_acc_z;
-extern lv_obj_t * ui_arc_bg_1;
-extern lv_obj_t * ui_arc_bg_2_1;
-extern lv_obj_t * ui_arc_bg_2_2;
-extern lv_obj_t * ui_arc_bg_2_3;
+// ENHANCED: Tool Glow Elements
+extern lv_obj_t * ui_tool_bg_circle;           // Center glow circle
+extern lv_obj_t * ui_label_tool_indicator;     // Tool temp indicator
+// ENHANCED: Screen Rotation Views - Temp Graph Elements
+extern lv_obj_t * ui_temp_chart;               // Temperature history chart
+extern lv_obj_t * ui_label_temp_title;         // "Nozzle Temp" title
+extern lv_obj_t * ui_label_temp_current;       // Current temp value
+// ENHANCED: Screen Rotation Views - Main Screen Animation
+extern lv_obj_t * ui_main_screen_gif;          // Main screen animation (tool_X.gif)
 // SCREEN: ui_ScreenHeatingNozzle
 void ui_ScreenHeatingNozzle_screen_init(void);
 extern lv_obj_t * ui_ScreenHeatingNozzle;
@@ -260,6 +268,7 @@ LV_IMG_DECLARE(ui_img_backlight_png);    // assets\backlight.png
 LV_IMG_DECLARE(ui_img_btn_cancel_png);    // assets\btn_cancel.png
 LV_IMG_DECLARE(ui_img_popup_png);    // assets\popup.png
 LV_IMG_DECLARE(ui_img_test_png);    // assets\test.png
+LV_IMG_DECLARE(ui_img_progress_ring);    // assets\progress_ring.png
 
 LV_FONT_DECLARE(ui_font_InterSeimiBold32);
 LV_FONT_DECLARE(ui_font_InterSemiBold14);

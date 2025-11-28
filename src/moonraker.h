@@ -18,8 +18,22 @@ typedef struct {
     int16_t bed_target;
     int16_t nozzle_actual;
     int16_t nozzle_target;
+
+    // Active tool info (for Print Progress Screen)
+    int16_t active_tool_temp;          // °C, rounded
+    int     active_tool_index;         // 0..5
+    char    active_tool_name[16];      // e.g. "extruder", "extruder3"
+    
+    // All extruder temperatures (for multi-tool displays)
+    int16_t extruder_temps[6];         // °C, rounded for extruder0-5
     uint8_t progress;
     char file_path[32];
+    
+    // Layer & Time data for Print Progress Screen
+    int16_t current_layer;
+    int16_t total_layers;
+    int32_t print_duration;      // Elapsed print time in seconds
+    int32_t estimated_time;      // Estimated total time in seconds
 
     bool pause;
     bool printing;    // is klipper in a printing task (including printing, pausing, paused, cancelling)
@@ -56,6 +70,7 @@ class MOONRAKER {
         void get_printer_info(void);
         void get_progress(void);
         void get_knomi_status(void);
+        void get_idle_timeout(void);
 };
 
 extern MOONRAKER moonraker;

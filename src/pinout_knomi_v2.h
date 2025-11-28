@@ -3,14 +3,32 @@
 
 #define BOOT_PIN     0
 
+// ========================================================================
+// HARDWARE CONFIGURATION: Select Feature Set
+// IMPORTANT: Camera and Buttons/LEDs cannot be used simultaneously!
+// ========================================================================
+// Option A: VORON 6-Toolhead Mode (Buttons/LEDs active, Camera disabled)
+#define KNOMI_USE_BUTTONS_LEDS
+// #define KNOMI_USE_CAMERA
+
+// Option B: Standard Mode (Camera active, Buttons/LEDs disabled)
+// #define KNOMI_USE_BUTTONS_LEDS
+// #define KNOMI_USE_CAMERA
+// ========================================================================
+
 // common i2c
 #define I2C0_SUPPORT
 #define I2C0_SPEED   100000
 #define I2C0_SCL_PIN 1
 #define I2C0_SDA_PIN 2
-// #define I2C1_SPEED   100000
-// #define I2C1_SCL_PIN 3
-// #define I2C1_SDA_PIN 4
+
+// I2C1 for Camera (if enabled)
+#ifdef KNOMI_USE_CAMERA
+#define I2C1_SUPPORT
+#define I2C1_SPEED   100000
+#define I2C1_SCL_PIN 3
+#define I2C1_SDA_PIN 4
+#endif
 
 // GC9A01 SPI TFT
 // #define GC9A01_MISO_PIN 13
@@ -30,12 +48,16 @@
 // LIS2DW Accelerometer
 #define LIS2DW_SUPPORT
 
-// OV2640 Camera
+// ========================================================================
+// Hardware Feature Definitions (based on configuration)
+// ========================================================================
+#ifdef KNOMI_USE_CAMERA
+// OV2640 Camera Pins
 #define CAM_PWDN_PIN  10
 #define CAM_RESET_PIN 11
 #define CAM_XCLK_PIN  7
-#define CAM_SDA_PIN   I2C1_SDA_PIN
-#define CAM_SCL_PIN   I2C1_SCL_PIN
+#define CAM_SDA_PIN   4  // I2C1_SDA
+#define CAM_SCL_PIN   3  // I2C1_SCL
 #define CAM_D9_PIN    8
 #define CAM_D8_PIN    6
 #define CAM_D7_PIN    5
@@ -49,14 +71,18 @@
 #define CAM_VSYNC_PIN 15
 #define CAM_HREF_PIN  9
 #define CAM_PCLK_PIN  48
+#endif
 
-// Button
-#define BTN_1_PIN I2C1_SDA_PIN
-#define BTN_2_PIN I2C1_SCL_PIN
-#define BTN_3_PIN CAM_RESET_PIN
-// LED
-#define LED_2_PIN CAM_D0_PIN
-#define LED_3_PIN CAM_D1_PIN
-#define LED_4_PIN CAM_D4_PIN
+#ifdef KNOMI_USE_BUTTONS_LEDS
+// Buttons (use pins that would otherwise be used for Camera I2C)
+#define BTN_1_PIN 4  // Would be CAM_SDA_PIN
+#define BTN_2_PIN 3  // Would be CAM_SCL_PIN
+#define BTN_3_PIN 11 // Would be CAM_RESET_PIN
+
+// LEDs (use pins that would otherwise be used for Camera data)
+#define LED_2_PIN 45 // Would be CAM_D0_PIN
+#define LED_3_PIN 42 // Would be CAM_D1_PIN
+#define LED_4_PIN 41 // Would be CAM_D4_PIN
+#endif
 
 #endif

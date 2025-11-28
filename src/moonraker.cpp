@@ -2,8 +2,9 @@
 #include <ArduinoJson.h>
 #include "moonraker.h"
 #include "knomi.h"
+#include "power_management/display_sleep.h"
 
-// #define MOONRAKER_DEBUG
+//#define MOONRAKER_DEBUG  // Enable for layer debug
 
 void lv_popup_warning(const char * warning, bool clickable);
 
@@ -90,6 +91,8 @@ bool MOONRAKER::post_gcode_to_queue(String gcode) {
 }
 
 void MOONRAKER::get_printer_ready(void) {
+    bool was_unready = unready;
+    
     String webhooks = send_request("GET", "/printer/objects/query?webhooks");
     if (!webhooks.isEmpty()) {
         DynamicJsonDocument json_parse(webhooks.length() * 2);
@@ -100,6 +103,12 @@ void MOONRAKER::get_printer_ready(void) {
         Serial.print("unready: ");
         Serial.println(unready);
 #endif
+        
+        // CRITICAL: When Klipper changes from unready → ready (e.g. after FIRMWARE_RESTART)
+        // → Reset Klipper Idle Timer, otherwise display sleeps immediately!
+        if (was_unready && !unready) {
+            display_reset_klipper_idle_timer();
+        }
     } else {
         unready = true;
         Serial.println("Empty: moonraker: get_printer_ready");
@@ -121,8 +130,8 @@ void MOONRAKER::get_printer_info(void) {
         data.nozzle_actual = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["actual"].as<double>() + 0.5f);
         data.nozzle_target = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["target"].as<double>() + 0.5f);
 #ifdef MOONRAKER_DEBUG
-        Serial.print("unoperational: ");
-        Serial.println(unoperational);
+        Serial.print("unready: ");
+        Serial.println(unready);
         Serial.print("printing: ");
         Serial.println(data.printing);
         Serial.print("bed_actual: ");
@@ -153,23 +162,110 @@ const char * path_only_gcode(const char * path)
 }
 
 void MOONRAKER::get_progress(void) {
-    String display_status = send_request("GET", "/printer/objects/query?virtual_sdcard");
+    // Skip progress query if we are not actively printing (saves traffic/CPU)
+    if (!data.printing) {
+        return;
+    }
+    String display_status = send_request("GET", "/printer/objects/query?virtual_sdcard&print_stats&display_status&toolhead&extruder&extruder1&extruder2&extruder3&extruder4&extruder5");
     if (!display_status.isEmpty()) {
         DynamicJsonDocument json_parse(display_status.length() * 2);
-        deserializeJson(json_parse, display_status);
+        DeserializationError error = deserializeJson(json_parse, display_status);
+        if (error) {
+            Serial.println("JSON parse error in get_progress");
+            return;
+        }
+        
+        // Progress & File Path
         data.progress = (uint8_t)(json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<double>() * 100 + 0.5f);
         String path = json_parse["result"]["status"]["virtual_sdcard"]["file_path"].as<String>();
-        strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path) - 1);
-        data.file_path[sizeof(data.file_path) - 1] = 0;
+        strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path));  // strlcpy handles null-termination correctly
+        
+        // Layer data (from print_stats.info, not display_status!)
+        JsonObject info = json_parse["result"]["status"]["print_stats"]["info"];
+        if (!info.isNull()) {
+            data.current_layer = info["current_layer"].as<int>();
+            data.total_layers = info["total_layer"].as<int>();  // Note: "total_layer" without 's'!
+        } else {
+            data.current_layer = 0;
+            data.total_layers = 0;
+        }
+        
+        // Time data (from print_stats)
+        data.print_duration = json_parse["result"]["status"]["print_stats"]["print_duration"].as<int>();
+        data.estimated_time = json_parse["result"]["status"]["print_stats"]["total_duration"].as<int>();
+
+        // Active tool (from toolhead)
+        String active_name = json_parse["result"]["status"]["toolhead"]["extruder"].as<String>();
+        if (active_name.length() == 0) active_name = "extruder"; // default
+        strlcpy(data.active_tool_name, active_name.c_str(), sizeof(data.active_tool_name));
+
+        // Derive index: "extruder" -> 0, "extruderN" -> N
+        int idx = 0;
+        if (active_name.length() > 8) {
+            const char *p = active_name.c_str() + 8; // skip "extruder"
+            if (*p) idx = atoi(p);
+        }
+        data.active_tool_index = idx;
+
+        // Read temperature from the matching extruder object
+        JsonVariant ex = json_parse["result"]["status"][active_name];
+        double t = 0.0;
+        if (!ex.isNull()) {
+            t = ex["temperature"].as<double>();
+        } else {
+            // Fallback to previous single-nozzle field if object not present
+            t = data.nozzle_actual;
+        }
+        data.active_tool_temp = (int16_t)(t + 0.5f);
+
+        if (data.active_tool_temp < 0 || data.active_tool_temp > 500) {
+            data.active_tool_temp = 0;
+        }
+        
+        // Read ALL extruder temperatures (for multi-tool displays)
+        // Each display will show its own tool's temperature
+        for (int i = 0; i < 6; i++) {
+            String extruder_name = (i == 0) ? "extruder" : "extruder" + String(i);
+            JsonVariant ext_obj = json_parse["result"]["status"][extruder_name];
+            
+            if (!ext_obj.isNull()) {
+                double temp = ext_obj["temperature"].as<double>();
+                data.extruder_temps[i] = (int16_t)(temp + 0.5f);
+                
+                // Sanity check
+                if (data.extruder_temps[i] < 0 || data.extruder_temps[i] > 500) {
+                    data.extruder_temps[i] = 0;
+                }
+            } else {
+                // Extruder not present
+                data.extruder_temps[i] = 0;
+            }
+        }
+        
 #ifdef MOONRAKER_DEBUG
         Serial.print("progress: ");
         Serial.println(data.progress);
         Serial.print("path: ");
         Serial.println(data.file_path);
+        Serial.print("current_layer: ");
+        Serial.println(data.current_layer);
+        Serial.print("total_layers: ");
+        Serial.println(data.total_layers);
+        Serial.print("print_duration: ");
+        Serial.println(data.print_duration);
+        Serial.print("estimated_time: ");
+        Serial.println(data.estimated_time);
+        Serial.print("active_tool_name: ");
+        Serial.println(data.active_tool_name);
+        Serial.print("active_tool_index: ");
+        Serial.println(data.active_tool_index);
+        Serial.print("active_tool_temp: ");
+        Serial.println(data.active_tool_temp);
 #endif
     } else {
         Serial.println("Empty: moonraker: get_progress");
     }
+    data_unlock = true;
 }
 
 void MOONRAKER::get_knomi_status(void) {
@@ -199,6 +295,24 @@ void MOONRAKER::get_knomi_status(void) {
     }
 }
 
+void MOONRAKER::get_idle_timeout(void) {
+    String idle_status = send_request("GET", "/printer/objects/query?idle_timeout");
+    if (!idle_status.isEmpty()) {
+        DynamicJsonDocument json_parse(idle_status.length() * 2);
+        deserializeJson(json_parse, idle_status);
+        String state = json_parse["result"]["status"]["idle_timeout"]["state"].as<String>();
+        if (!state.isEmpty()) {
+            display_update_klipper_idle_state(state.c_str());
+#ifdef MOONRAKER_DEBUG
+            Serial.print("idle_timeout state: ");
+            Serial.println(state);
+#endif
+        }
+    } else {
+        Serial.println("Empty: moonraker: get_idle_timeout");
+    }
+}
+
 void MOONRAKER::http_get_loop(void) {
     data_unlock = false;
     get_printer_ready();
@@ -208,6 +322,7 @@ void MOONRAKER::http_get_loop(void) {
         // but printing flag has not refresh
         get_knomi_status();
         get_printer_info();
+        get_idle_timeout();  // Update idle_timeout state for display sleep management
         if (data.printing) {
             get_progress();
         }
@@ -215,7 +330,20 @@ void MOONRAKER::http_get_loop(void) {
     data_unlock = true;
 }
 
+
 MOONRAKER moonraker;
+
+extern "C" void knomi_request_pause(void) {
+    // Moonraker HTTP API: POST /printer/print/pause
+    // Queue the request so it is sent from the moonraker post task
+    moonraker.post_to_queue("/printer/print/pause");
+}
+
+extern "C" void knomi_request_cancel(void) {
+    // Moonraker HTTP API: POST /printer/print/cancel
+    // Queue the request so it is sent from the moonraker post task
+    moonraker.post_to_queue("/printer/print/cancel");
+}
 
 void moonraker_post_task(void * parameter) {
     for(;;) {

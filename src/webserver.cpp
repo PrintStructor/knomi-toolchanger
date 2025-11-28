@@ -3,6 +3,7 @@
 #include <ESPmDNS.h>
 
 #include "knomi.h"
+#include "power_management/display_sleep.h"
 
 static AsyncWebServer server(SERVER_PORT);
 
@@ -227,6 +228,42 @@ void webserver_setup(void) {
         }
     });
 
+    // ========================================================================
+    // Display Sleep API Endpoints
+    // ========================================================================
+    
+    server.on("/api/sleep", HTTP_POST, [](AsyncWebServerRequest *request){
+        display_enter_sleep();
+        request->send(200, "application/json", "{\"status\":\"sleeping\"}");
+    });
+    
+    server.on("/api/wake", HTTP_POST, [](AsyncWebServerRequest *request){
+        display_wake_up();
+        request->send(200, "application/json", "{\"status\":\"awake\"}");
+    });
+    
+    server.on("/api/sleep/status", HTTP_GET, [](AsyncWebServerRequest *request){
+        bool is_sleeping = display_is_sleeping();
+        display_sleep_state_t state = display_get_state();
+        display_sleep_mode_t mode = display_sleep_get_mode();
+        
+        String state_str = 
+            (state == DISPLAY_STATE_ACTIVE) ? "active" :
+            (state == DISPLAY_STATE_IDLE) ? "idle" : "sleeping";
+        
+        String mode_str = 
+            (mode == SLEEP_MODE_MANUAL) ? "manual" :
+            (mode == SLEEP_MODE_KLIPPER_SYNC) ? "klipper_sync" : "led_sync";
+        
+        String json = "{";
+        json += "\"sleeping\":" + String(is_sleeping ? "true" : "false") + ",";
+        json += "\"state\":\"" + state_str + "\",";
+        json += "\"mode\":\"" + mode_str + "\"";
+        json += "}";
+        
+        request->send(200, "application/json", json);
+    });
+    
     server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
     server.begin();
 }

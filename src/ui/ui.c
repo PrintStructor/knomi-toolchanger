@@ -105,22 +105,21 @@ void ui_event_btn_set_extrude_ok(lv_event_t * e);
 lv_obj_t * ui_btn_set_extrude_ok;
 lv_obj_t * ui_img_set_extrude_ok;
 
-// SCREEN: ui_ScreenPrinting
+// SCREEN: ui_ScreenPrinting - UPDATED
 void ui_ScreenPrinting_screen_init(void);
 void ui_event_ScreenPrinting(lv_event_t * e);
 lv_obj_t * ui_ScreenPrinting;
-lv_obj_t * ui_label_printing_progress;
-lv_obj_t * ui_arc_printing_progress;
+lv_obj_t * ui_gif_print_progress_bg;         // Animiertes GIF
+lv_obj_t * ui_arc_progress_cover;            // Cover Arc
+lv_obj_t * ui_label_printing_progress;       // Progress %
+lv_obj_t * ui_label_progress_eta;            // ETA
+lv_obj_t * ui_label_progress_layer;          // Layer
 lv_obj_t * ui_slider_printing_acc_x;
 lv_obj_t * ui_label_printing_acc_x;
 lv_obj_t * ui_slider_printing_acc_y;
 lv_obj_t * ui_label_printing_acc_y;
 lv_obj_t * ui_slider_printing_acc_z;
 lv_obj_t * ui_label_printing_acc_z;
-lv_obj_t * ui_arc_bg_1;
-lv_obj_t * ui_arc_bg_2_1;
-lv_obj_t * ui_arc_bg_2_2;
-lv_obj_t * ui_arc_bg_2_3;
 
 // SCREEN: ui_ScreenHeatingNozzle
 void ui_ScreenHeatingNozzle_screen_init(void);

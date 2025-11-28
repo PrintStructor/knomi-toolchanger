@@ -1,5 +1,6 @@
 #include "lvgl_hal.h"
 #include "pinout.h"
+#include "power_management/display_sleep.h"
 
 TFT_eSPI tft_gc9a01 = TFT_eSPI();
 #ifdef CST816S_SUPPORT
@@ -34,6 +35,7 @@ void usr_touchpad_read(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * dat
         data->point.x = event.x;
         data->point.y = event.y;
         touch_idle_time_clear();
+        display_sleep_reset_timer();  // Wake up display on touch
     } else {
         data->state = LV_INDEV_STATE_REL;
     }

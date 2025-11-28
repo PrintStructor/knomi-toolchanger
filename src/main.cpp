@@ -40,7 +40,7 @@ void setup() {
 #endif
 
     xTaskCreate(lvgl_ui_task, "lvgl ui",
-        4096,  // Stack size (bytes)
+        16384,  // Stack size (bytes) - INCREASED for GIF decoding (was 4096)
         NULL,  // Parameter to pass
         10,     // Task priority
         NULL   // Task handle
