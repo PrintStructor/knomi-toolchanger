@@ -173,7 +173,7 @@ Then add to your `printer.cfg`:
 > **Note:** The `knomi.cfg` file contains G-code macro overrides for display integration.
 > The `macros.cfg` file includes toolchanger-specific macros and QGL integration.
 
-See [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) for full setup.
+For detailed Klipper setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md).
 
 ---
 
@@ -244,7 +244,7 @@ timeout: 30.0
 verbose: False
 ```
 
-See [docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) for complete setup.
+For complete multi-display setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) (firmware branch).
 
 ---
 
@@ -347,14 +347,20 @@ For full multi-tool integration, see:
 - **KNOMI Toolchanger** (this repo) - Display status, power management, per-tool visualization
 
 ### Core Documentation
-- [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system setup
-- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros
-- [DISPLAY_SLEEP_README.md](DISPLAY_SLEEP_README.md) - Technical deep-dive
 
-### Component Documentation
-- [src/power_management/README.md](src/power_management/README.md) - Sleep API reference
-- [docs/FIXES_DEUTSCH.md](docs/FIXES_DEUTSCH.md) - Bug fixes (German)
-- [docs/TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
+Key documents:
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [FEATURES.md](FEATURES.md) - Complete feature list
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md) - Release highlights
+
+### Installation & Setup
+- [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
+- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros and G-code integration
+
+### Technical Documentation
+- [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
+- [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference (firmware branch)
 
 ---
 
@@ -433,7 +439,7 @@ This project extends the original with:
 ### Documentation
 - [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
 - [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
-- [Technical Deep-Dive](DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting
+- [Technical Deep-Dive](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting (firmware branch)
 
 ### Debug Tools
 ```bash
