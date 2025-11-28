@@ -154,7 +154,7 @@ pio run -e knomiv2 -t uploadfs
 
 **Option 1: Copy config files to Klipper directory**
 ```bash
-# Copy to your Klipper config directory
+# Copy to your Klipper config directory (from firmware branch)
 cp knomi.cfg macros.cfg ~/printer_data/config/
 ```
 
@@ -431,9 +431,9 @@ This project extends the original with:
 ## 📞 Support
 
 ### Documentation
-- [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md)
-- [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md)
-- [Troubleshooting](docs/DISPLAY_SLEEP_README.md#-troubleshooting)
+- [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
+- [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
+- [Technical Deep-Dive](DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting
 
 ### Debug Tools
 ```bash
