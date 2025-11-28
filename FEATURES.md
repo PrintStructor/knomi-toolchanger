@@ -439,5 +439,5 @@ upload_url = http://knomi-t0.local/update
 
 ---
 
-**Last Updated:** January 28, 2025  
-**Version:** 3.1.0
+**Last Updated:** January 28, 2025
+**Version:** 1.0.0
