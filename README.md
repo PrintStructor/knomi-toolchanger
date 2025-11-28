@@ -173,7 +173,7 @@ Then add to your `printer.cfg`:
 > **Note:** The `knomi.cfg` file contains G-code macro overrides for display integration.
 > The `macros.cfg` file includes toolchanger-specific macros and QGL integration.
 
-See [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) for full setup.
+For detailed Klipper setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) (firmware branch).
 
 ---
 
@@ -244,7 +244,7 @@ timeout: 30.0
 verbose: False
 ```
 
-See [docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) for complete setup.
+For complete multi-display setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) (firmware branch).
 
 ---
 
@@ -436,9 +436,9 @@ This project extends the original with:
 ## 📞 Support
 
 ### Documentation
-- [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md)
-- [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md)
-- [Troubleshooting](docs/DISPLAY_SLEEP_README.md#-troubleshooting)
+- [Installation Guide](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
+- [Klipper Integration](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
+- [Technical Deep-Dive](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting
 
 ### Debug Tools
 ```bash
