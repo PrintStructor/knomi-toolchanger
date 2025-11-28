@@ -173,7 +173,7 @@ Then add to your `printer.cfg`:
 > **Note:** The `knomi.cfg` file contains G-code macro overrides for display integration.
 > The `macros.cfg` file includes toolchanger-specific macros and QGL integration.
 
-For detailed Klipper setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) (firmware branch).
+For detailed Klipper setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md).
 
 ---
 
@@ -348,18 +348,19 @@ For full multi-tool integration, see:
 
 ### Core Documentation
 
-> **📁 Full documentation is available on the [`firmware` branch](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware)**
-
 Key documents:
 - [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
 - [FEATURES.md](FEATURES.md) - Complete feature list
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
 - [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md) - Release highlights
 
-### Advanced Documentation (firmware branch)
-- [DISPLAY_SLEEP_INSTALLATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system setup
-- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros
-- [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference
+### Installation & Setup
+- [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
+- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros and G-code integration
+
+### Technical Documentation
+- [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
+- [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference (firmware branch)
 
 ---
 
@@ -436,9 +437,9 @@ This project extends the original with:
 ## 📞 Support
 
 ### Documentation
-- [Installation Guide](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
-- [Klipper Integration](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
-- [Technical Deep-Dive](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting
+- [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
+- [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
+- [Technical Deep-Dive](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting (firmware branch)
 
 ### Debug Tools
 ```bash
