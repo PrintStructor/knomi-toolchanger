@@ -116,8 +116,11 @@ KNOMI_6_VORON/
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/KNOMI_6_VORON.git
-cd KNOMI_6_VORON
+git clone https://github.com/PrintStructor/knomi-toolchanger.git
+cd knomi-toolchanger
+
+# Switch to firmware branch (contains source code)
+git checkout firmware
 
 # Build firmware
 pio run -e knomiv2
@@ -128,6 +131,10 @@ pio run -e knomiv2 -t upload
 # Upload filesystem (GIFs)
 pio run -e knomiv2 -t uploadfs
 ```
+
+> **Note:** This repository uses a dual-branch structure:
+> - `master` branch: Documentation only
+> - `firmware` branch: Complete source code and documentation
 
 ### 3. Configure WiFi
 
@@ -145,12 +152,26 @@ pio run -e knomiv2 -t uploadfs
 
 ### 4. Configure Klipper
 
-Add to your `printer.cfg`:
+**Option 1: Copy config files to Klipper directory**
+```bash
+# Copy to your Klipper config directory (from firmware branch)
+cp knomi.cfg macros.cfg ~/printer_data/config/
+```
 
+Then add to your `printer.cfg`:
 ```ini
 [include knomi.cfg]
 [include macros.cfg]
 ```
+
+**Option 2: Use absolute path**
+```ini
+[include /path/to/knomi-toolchanger/knomi.cfg]
+[include /path/to/knomi-toolchanger/macros.cfg]
+```
+
+> **Note:** The `knomi.cfg` file contains G-code macro overrides for display integration.
+> The `macros.cfg` file includes toolchanger-specific macros and QGL integration.
 
 See [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) for full setup.
 
@@ -317,15 +338,28 @@ curl -X POST http://knomi-t0.local/api/wake
 
 ## 📚 Documentation
 
-### Core Documentation
-- [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system setup
-- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros
-- [DISPLAY_SLEEP_README.md](DISPLAY_SLEEP_README.md) - Technical deep-dive
+### Ecosystem Integration
 
-### Component Documentation
-- [src/power_management/README.md](src/power_management/README.md) - Sleep API reference
-- [docs/FIXES_DEUTSCH.md](docs/FIXES_DEUTSCH.md) - Bug fixes (German)
-- [docs/TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
+> **🔧 This firmware is part of the [Klipper Toolchanger Extended](https://github.com/PrintStructor/klipper-toolchanger-extended) ecosystem**
+
+For full multi-tool integration, see:
+- **[Klipper Toolchanger Extended](https://github.com/PrintStructor/klipper-toolchanger-extended)** - Safety logic, tool management, collision detection
+- **KNOMI Toolchanger** (this repo) - Display status, power management, per-tool visualization
+
+### Core Documentation
+
+> **📁 Full documentation is available on the [`firmware` branch](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware)**
+
+Key documents:
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [FEATURES.md](FEATURES.md) - Complete feature list
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md) - Release highlights
+
+### Advanced Documentation (firmware branch)
+- [DISPLAY_SLEEP_INSTALLATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system setup
+- [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros
+- [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference
 
 ---
 
