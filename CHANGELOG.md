@@ -2,7 +2,7 @@
 
 All notable changes to the KNOMI 6-Toolhead project.
 
-## [3.1.0] - 2025-10-25
+## [1.0.0] - 2025-10-25
 
 ### 🎉 Major Features
 
@@ -11,10 +11,9 @@ All notable changes to the KNOMI 6-Toolhead project.
   - Manual Mode: Time-based (60s idle → 5min sleep)
   - Klipper Sync: Follows Klipper's idle state (30s delay)
   - LED Sync: Mirrors case LED status
-- **Backlight-only sleep** (no hardware commands)
-  - Instant wake-up (<100ms)
-  - No display re-initialization
-  - ~7% power savings
+- **Hardware sleep (GC9A01 SLPIN/SLPOUT)** with LVGL timers paused
+  - Full re-init on wake for stability
+  - ~85% power savings (~50mA vs ~300mA)
 - **Intelligent wake triggers:**
   - Touch input
   - Print start
@@ -89,13 +88,9 @@ GET  /api/sleep/status   - Get sleep status
 
 #### Sleep System Architecture
 ```cpp
-// Old: Hardware sleep with full re-init (slow)
-gc9a01_sleep_in()  → SLPIN command → 120ms delay
-gc9a01_sleep_out() → SLPOUT → init() → invertDisplay() → 510ms total
-
-// New: Backlight-only (instant)
-sleep  → Backlight OFF → 0ms
-wake   → Backlight ON  → 0ms
+// Current: Hardware sleep with re-init for stability
+gc9a01_sleep_in()  → DISPOFF + SLPIN → ~140ms total
+gc9a01_sleep_out() → SLPOUT → init() → invertDisplay() → fillScreen(BLACK) → DISPON → ~500ms total
 ```
 
 #### State Management
@@ -184,19 +179,13 @@ static void gc9a01_sleep_out(void);  // Now backlight-only
 
 ### 🗑️ Removed
 
-#### Deprecated Features
-- Hardware display sleep commands (SLPIN/SLPOUT)
-- Full display re-initialization on wake
-- Software-only sleep mode (was unreliable)
-
-#### Cleaned Up
 - Removed unused build filters in platformio.ini
 - Removed backup files (`.bak`, `_OLD`, etc.)
 - Removed obsolete GIF references
 
 ---
 
-## [3.0.0] - 2025-10-13
+## [0.9.0] - 2025-10-13
 
 ### Initial 6-Toolhead Support
 

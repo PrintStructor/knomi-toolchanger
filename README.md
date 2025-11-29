@@ -265,6 +265,8 @@ For complete multi-display setup, see `docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md
 - Duration: 2-5 seconds (looping)
 - File size: <200KB per GIF
 
+**Helper tool:** You can generate/preview KNOMI-ready GIFs with [pandamation.techjeeper.com](https://pandamation.techjeeper.com) and drop the exports into `data/gifs/`.
+
 ### Custom Animations
 
 Built-in animations in `src/gif/`:
@@ -494,6 +496,6 @@ Your support helps maintain and improve both this firmware and the [Klipper Tool
 
 ---
 
-**Last Updated:** January 28, 2025
+**Last Updated:** October 25, 2025
 **Version:** 1.0.0
 **Status:** ✅ Production Ready
