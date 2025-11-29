@@ -251,6 +251,7 @@ For complete multi-display setup, see `docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md
 ## 🎨 Customization
 
 **Filesystem-based GIFs:** Tool animations live in `data/gifs/` and can be replaced without code changes—just drop your GIFs and run `pio run -e knomiv2 -t uploadfs`.
+**Placement diagram (placeholder):** `docs/images/gif_placement.png`
 
 ### Add Your Own Tool GIFs
 

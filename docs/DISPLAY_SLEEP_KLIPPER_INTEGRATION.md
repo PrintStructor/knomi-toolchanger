@@ -10,6 +10,7 @@ How the sleep system interacts with Klipper/Moonraker and what you need to confi
 - `/printer/objects/query?gcode_macro _KNOMI_STATUS` → custom flags the macros expose:
   - `homing`, `probing`, `qgling`
   - `heating_nozzle`, `heating_bed`
+- Diagram placeholder: `docs/images/klipper_flags.png`
 
 These fields drive wake decisions in `lv_moonraker_change_screen.cpp`.
 

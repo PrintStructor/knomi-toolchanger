@@ -9,6 +9,7 @@
 - Two-stage flow: **Idle** (shows tool GIF) → **Sleep** (backlight off, hardware sleep)
 - LVGL timers pause to reduce CPU load; WiFi stays alive for Moonraker polling
 - Wakes on: touch, print start, homing/probing/QGL, nozzle/bed heating
+- Diagram placeholder: `docs/images/sleep_flow.png`
 
 ---
 
