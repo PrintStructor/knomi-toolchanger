@@ -244,7 +244,7 @@ timeout: 30.0
 verbose: False
 ```
 
-For complete multi-display setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) (firmware branch).
+For complete multi-display setup, see `docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md`.
 
 ---
 
@@ -357,8 +357,10 @@ Key documents:
 ### Installation & Setup
 - [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
 - [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - Klipper macros and G-code integration
+- [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Optional temp graph cleanup
 
 ### Technical Documentation
+- [docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md) - Developer/porting notes for the sleep system
 - [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
 - [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference (firmware branch)
 
@@ -439,7 +441,7 @@ This project extends the original with:
 ### Documentation
 - [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md) - Sleep system installation
 - [Klipper Integration](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md) - G-code macros and setup
-- [Technical Deep-Dive](https://github.com/PrintStructor/knomi-toolchanger/blob/firmware/DISPLAY_SLEEP_README.md) - Implementation details and troubleshooting (firmware branch)
+- [Developer Details](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md) - Hooks, timers, and porting notes
 
 ### Debug Tools
 ```bash
