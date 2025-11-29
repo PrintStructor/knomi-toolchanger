@@ -124,7 +124,7 @@ wake   → Backlight ON  → 0ms
 #### New Documentation
 - [DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md)
 - [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md)
-- [DISPLAY_SLEEP_README.md](DISPLAY_SLEEP_README.md)
+- [docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md)
 - [src/power_management/README.md](src/power_management/README.md)
 
 #### Updated Documentation
