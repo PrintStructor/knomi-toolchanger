@@ -17,7 +17,7 @@ Advanced firmware for BigTreeTech KNOMI displays with multi-toolhead support, in
 > - Synchronized sleep/wake across all 6 displays
 > - Seamless integration with toolchanger macros and safety features
 >
-> **Screenshot placeholder:** `docs/images/hero.png` (overview of the KNOMI UI)
+> **Screenshot placeholder:** `docs/images/KNOMI-6-TC.GIF` (overview of the KNOMI UI)
 
 ---
 
