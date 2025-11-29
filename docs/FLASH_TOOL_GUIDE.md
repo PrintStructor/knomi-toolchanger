@@ -1,217 +1,145 @@
-# ESP32 Flash Download Tool - Anleitung für KNOMI V2
+# ESP32 Flash Download Tool - KNOMI V2 Guide
 
-Detaillierte Anleitung zum Flashen der KNOMI V2 Firmware mit dem Espressif Flash Download Tool.
+Detailed steps to flash KNOMI V2 firmware with the Espressif Flash Download Tool (Windows-only).
+> Note: OTA/web upload is not supported with LittleFS. Use USB flashing (this tool on Windows, or `pio run -e knomiv2 --target upload/uploadfs` on macOS/Linux).
 
 ---
 
-## 📋 Voraussetzungen
+## 📋 Prerequisites
 
 ### Software
-- **ESP32 Flash Download Tool v3.9.5** (oder neuer)
+- **ESP32 Flash Download Tool v3.9.5** (or newer)
   - Download: [Espressif Official](https://www.espressif.com/en/support/download/other-tools)
-  - Alternativ: [GitHub Releases](https://github.com/espressif/esptool/releases)
+  - Alternative: [GitHub Releases](https://github.com/espressif/esptool/releases)
 
 ### Hardware
-- **BTT KNOMI V2 Display** mit ESP32-S3-R8
-- **USB-C Kabel** (Daten, nicht nur Laden)
-- **Windows PC** (Flash Download Tool läuft nur auf Windows)
+- **BTT KNOMI V2 display** with ESP32-S3-R8
+- **USB-C data cable**
+- **Windows PC** (the Flash Download Tool is Windows-only)
 
 ---
 
-## 🖼️ Screenshot-Referenz
+## 🖼️ Screenshot Reference
 
 ![ESP32 Flash Tool Settings](https://raw.githubusercontent.com/PrintStructor/knomi-toolchanger/firmware/docs/images/flash_tool_example.png)
 
-> **Hinweis:** Die oben gezeigte Konfiguration ist **funktional**, aber nicht **optimal**. Siehe unten für empfohlene Einstellungen.
+> The shown configuration works but is not optimal. See recommended settings below.
 
-### Firmware-Dateien
-Die folgenden 4 Dateien benötigst du aus dem [Release v1.0.0](https://github.com/PrintStructor/knomi-toolchanger/releases/tag/v1.0.0):
+### Firmware files
+Obtain these 4 files from [Release v1.0.0](https://github.com/PrintStructor/knomi-toolchanger/releases/tag/v1.0.0):
 
-1. `bootloader.bin` (15 KB)
-2. `partitions.bin` (3 KB)
-3. `firmware_knomiv2_v1.0.0.bin` (2.93 MB)
-4. `littlefs.bin` (9.37 MB)
+1. `bootloader.bin`
+2. `partitions.bin`
+3. `firmware_knomiv2_v1.0.0.bin`
+4. `littlefs.bin`
 
 ---
 
-## 🔧 Flash Download Tool Konfiguration
+## 🔧 Flash Download Tool Configuration
 
-### Schritt 1: Tool starten
+### Step 1: Start the tool
+1. Extract the ESP32 Flash Download Tool.
+2. Launch `flash_download_tool_3.9.5.exe`.
+3. Select **ChipType: ESP32-S3**.
+4. Select **WorkMode: Develop**.
 
-1. Entpacke das ESP32 Flash Download Tool
-2. Starte `flash_download_tool_3.9.5.exe`
-3. Wähle **ChipType: ESP32-S3**
-4. Wähle **WorkMode: Develop**
+### Step 2: Configure files and offsets
+**Important:** Offsets must match exactly.
 
-### Schritt 2: Dateien und Offsets konfigurieren
+| File | Offset (Hex) | Checkbox | Description |
+|------|--------------|----------|-------------|
+| `bootloader.bin` | `0x1000` ⚠️ | ✅ | ESP32-S3 bootloader |
+| `partitions.bin` | `0x8000` | ✅ | Partition table |
+| `firmware_knomiv2_v1.0.0.bin` | `0x10000` | ✅ | Main firmware |
+| `littlefs.bin` | `0x710000` | ✅ | Filesystem (GIFs) |
 
-**WICHTIG:** Die Offsets müssen exakt übereinstimmen!
+⚠️ **Bootloader offset:**
+- Standard ESP32-S3: `0x1000` (recommended)
+- KNOMI V2 can also work at `0x0000` (as in some screenshots)
+- Recommendation: use `0x1000` for maximum compatibility.
 
-| Datei | Offset (Hex) | Checkbox | Beschreibung |
-|-------|-------------|----------|--------------|
-| `bootloader.bin` | `0x1000` ⚠️ | ✅ | ESP32-S3 Bootloader |
-| `partitions.bin` | `0x8000` | ✅ | Partition Table |
-| `firmware_knomiv2_v1.0.0.bin` | `0x10000` | ✅ | Hauptfirmware (10 MB) |
-| `littlefs.bin` | `0x710000` | ✅ | Dateisystem (GIFs) |
-
-⚠️ **WICHTIG - Bootloader Offset:**
-- **Standard ESP32-S3:** `0x1000` (empfohlen)
-- **BTT KNOMI V2:** Kann auch `0x0000` funktionieren (wie im Screenshot)
-- **Empfehlung:** Verwende `0x1000` für maximale Kompatibilität
-
-**Screenshot-Referenz:**
+Reference layout:
 ```
-[✅] bootloader.bin                    @ 0x1000  (oder 0x0000 bei KNOMI V2)
-[✅] partitions.bin                    @ 0x8000
-[✅] firmware_knomiv2_v1.0.0.bin      @ 0x10000
-[✅] littlefs.bin                      @ 0x710000
+[✅] bootloader.bin               @ 0x1000  (or 0x0000 on some KNOMI V2 boards)
+[✅] partitions.bin               @ 0x8000
+[✅] firmware_knomiv2_v1.0.0.bin  @ 0x10000
+[✅] littlefs.bin                 @ 0x710000
 ```
 
-### Schritt 3: Flash-Einstellungen
+### Step 3: Flash settings
 
-**Empfohlene Einstellungen (optimal):**
+Recommended (faster):
+| Setting | Value | Why |
+|---------|-------|-----|
+| **SPI SPEED** | `80MHz` | Fastest for KNOMI V2 |
+| **SPI MODE** | `QIO` | Quad I/O |
+| **FLASH SIZE** | `16MB` | Detected automatically |
+| **BAUD** | `921600` | Fast upload |
 
-| Einstellung | Wert | Beschreibung |
-|-------------|------|--------------|
-| **SPI SPEED** | `80MHz` | Maximale Geschwindigkeit für KNOMI V2 |
-| **SPI MODE** | `QIO` | Quad I/O (4 Datenleitungen) |
-| **FLASH SIZE** | `16MB` | Automatisch erkannt (QUAD: 16MB) |
-| **COM Port** | `COM3` (erkannt) | Dein KNOMI-Display |
-| **BAUD** | `921600` | Schnellste Übertragung |
+Compatible but slower:
+| Setting | Value |
+|---------|-------|
+| **SPI SPEED** | `40MHz` |
+| **SPI MODE** | `DIO` |
 
-**Alternative Einstellungen (funktional, aber langsamer):**
+### Step 4: Flash options
 
-| Einstellung | Wert | Warum funktioniert es? |
-|-------------|------|------------------------|
-| **SPI SPEED** | `40MHz` | Sicherer, aber 50% langsamer |
-| **SPI MODE** | `DIO` | Dual I/O statt Quad I/O |
-
-> **Hinweis:** Dein Screenshot zeigt `40MHz` und `DIO` - das funktioniert, ist aber nicht optimal. Für beste Performance verwende `80MHz` und `QIO`.
-
-### Schritt 4: Flash-Optionen
-
-| Option | Empfohlen | Dein Screenshot | Beschreibung |
-|--------|-----------|-----------------|--------------|
-| **DoNotChgBin** | ☐ | ✅ | Lässt Binary unverändert (meist nicht nötig) |
-| **CombineBin** | ☐ | ☐ | Erstellt kombinierte Binary |
-| **LockSettings** | ☐ | ☐ | Sperrt Flash-Einstellungen |
-
-> **Hinweis:** `DoNotChgBin` ist bei dir aktiviert - das ist okay, aber normalerweise nicht erforderlich.
+| Option | Recommended | Notes |
+|--------|-------------|-------|
+| **DoNotChgBin** | ☐ | Usually leave off |
+| **CombineBin** | ☐ | Not needed here |
+| **LockSettings** | ☐ | Leave off |
 
 ---
 
-## ⚡ Flash-Prozess
+## ⚡ Flash Process
 
-### 1. KNOMI Display vorbereiten
+### 1) Prepare the KNOMI
+1. Connect KNOMI via USB-C to your PC.
+2. Hold **BOOT** (if present).
+3. Tap **RESET** while holding BOOT.
+4. Release BOOT → ESP32 enters download mode.  
+   (Some boards enter download mode automatically when USB is connected.)
 
-1. **Verbinde das KNOMI** per USB-C mit deinem PC
-2. **Halte den BOOT-Button** gedrückt (falls vorhanden)
-3. **Drücke kurz den RESET-Button** (während BOOT gedrückt ist)
-4. **Lasse BOOT los** → ESP32 ist jetzt im Download-Modus
+### 2) Identify COM port
+- Windows Device Manager → “Ports (COM & LPT)” → note the COM number.
+- Select that COM port in the Flash Tool dropdown.
 
-> **Alternativ:** Einige KNOMI-Boards starten automatisch im Download-Modus, wenn USB verbunden wird.
+### 3) Start flashing
+1. Click **START**.
+2. Progress should show writing at each offset and finish with **FINISH**.
+3. Typical duration: ~2–4 minutes depending on baud/USB.
 
-### 2. COM-Port identifizieren
-
-**Windows Geräte-Manager:**
-- Öffne `Geräte-Manager` (Win+X → Geräte-Manager)
-- Unter "Anschlüsse (COM & LPT)" sollte `USB Serial Port (COMx)` erscheinen
-- Notiere die COM-Nummer (z.B. COM7)
-
-**Im Flash Tool:**
-- Wähle den erkannten COM-Port aus dem Dropdown
-
-### 3. Flash starten
-
-1. Klicke auf **START**
-2. Der Flash-Prozess beginnt:
-   ```
-   [0%] Connecting...
-   [5%] Erasing flash...
-   [10%] Writing bootloader.bin @ 0x1000...
-   [20%] Writing partitions.bin @ 0x8000...
-   [30%] Writing firmware.bin @ 0x10000...
-   [90%] Writing littlefs.bin @ 0x710000...
-   [100%] Verifying...
-   FINISH
-   ```
-
-3. **Dauer:** ca. 2-4 Minuten (abhängig von Baudrate und USB-Port)
-
-### 4. Fertigstellung
-
-Wenn "**FINISH**" in grün erscheint:
-1. ✅ Flash erfolgreich
-2. Trenne USB-Kabel
-3. Verbinde erneut → KNOMI startet mit neuer Firmware
+### 4) Finish
+1. When you see **FINISH** in green, flashing succeeded.
+2. Unplug USB, plug back in → KNOMI boots the new firmware.
 
 ---
 
-## 🐛 Problemlösungen
+## 🐛 Troubleshooting
 
-### Problem 1: "Connecting... timeout"
-
-**Ursache:** ESP32 nicht im Download-Modus
-
-**Lösung:**
-1. USB-Kabel trennen
-2. BOOT-Button gedrückt halten
-3. USB-Kabel verbinden (während BOOT gedrückt)
-4. Nach 2 Sekunden BOOT loslassen
-5. Im Flash Tool erneut auf START klicken
-
-### Problem 2: "Flash size mismatch"
-
-**Ursache:** Falsche Flash-Größe eingestellt
-
-**Lösung:**
-- Stelle sicher, dass **FLASH SIZE: 16 MB** ausgewählt ist
-- KNOMI V2 hat immer 16 MB Flash (ESP32-S3-R8)
-
-### Problem 3: "Write failed at 0xXXXXX"
-
-**Ursache:** Defektes USB-Kabel oder Port-Probleme
-
-**Lösung:**
-1. Verwende ein anderes USB-Kabel (Datenkabel, nicht nur Ladekabel)
-2. Wechsle den USB-Port (bevorzugt USB 2.0 statt 3.0)
-3. Reduziere Baudrate auf `460800` oder `115200`
-
-### Problem 4: "COM Port not found"
-
-**Ursache:** Treiber fehlen
-
-**Lösung:**
-- Installiere **CP210x USB to UART Bridge Driver**
-  - Download: [Silicon Labs](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
-- Oder **CH340 Driver** (je nach KNOMI-Variante)
-  - Download: [WCH Official](http://www.wch.cn/downloads/CH341SER_EXE.html)
-
-### Problem 5: "Invalid partition table"
-
-**Ursache:** Falsche Offset-Adresse für `partitions.bin`
-
-**Lösung:**
-- **partitions.bin MUSS bei 0x8000 sein** (nicht 0x8000**0** oder 0x**0**8000)
-- Prüfe, dass alle Offsets korrekt sind (siehe Tabelle oben)
+- **"Connecting... timeout":** ESP32 not in download mode. Unplug USB, hold BOOT, plug in, release BOOT after ~2s, click START again.
+- **"Flash size mismatch":** Set **FLASH SIZE: 16MB** (KNOMI V2 is 16MB).
+- **"Write failed at 0xXXXXX":** Try another USB data cable/port; lower baud to `460800` or `115200`.
+- **"COM Port not found":** Install the USB-UART driver for your board (CP210x or CH340, depending on variant).
+- **"Invalid partition table":** Ensure `partitions.bin` is at `0x8000` and other offsets match the table above.
 
 ---
 
-## 📊 Verifikation nach dem Flash
+## 📊 Post-Flash Verification
 
-### 1. Serieller Monitor (optional)
-
-Verbinde mit 115200 Baud und prüfe die Boot-Logs:
+### 1) Serial monitor (optional)
+Connect at 115200 baud and check boot logs:
 
 ```bash
-# Mit PlatformIO
+# Using PlatformIO
 pio device monitor -b 115200
 
-# Mit Arduino IDE Serial Monitor
+# Using Arduino IDE
 Tools → Serial Monitor → 115200 baud
 ```
 
-**Erwartete Ausgabe:**
+Expected output:
 ```
 [Boot] KNOMI V2 Firmware v1.0.0
 [Boot] ESP32-S3-R8 (16MB Flash, 8MB PSRAM)
@@ -221,28 +149,26 @@ Tools → Serial Monitor → 115200 baud
 [FS] Loading GIF for tool X from /gifs/tool_X.gif
 ```
 
-### 2. WiFi Konfiguration
+### 2) WiFi setup
+1. After flashing, KNOMI starts in **AP mode**: `KNOMI_AP_XXXXX`.
+2. Connect to that WiFi.
+3. Open `192.168.4.1`.
+4. Enter your WiFi credentials.
+5. KNOMI reboots and joins your network.
 
-Nach erfolgreichem Flash:
-1. KNOMI startet im **AP-Modus**: `KNOMI_AP_XXXXX`
-2. Verbinde dich mit diesem WLAN
-3. Navigiere zu `192.168.4.1`
-4. Gib deine WiFi-Credentials ein
-5. KNOMI startet neu und verbindet sich mit deinem WLAN
+### 3) Functional check
 
-### 3. Funktionstest
+Display:
+- ✅ Touch responds
+- ✅ Standby GIF shows
+- ✅ Temperature display works
 
-**Display-Test:**
-- ✅ Touchscreen reagiert
-- ✅ Standby-GIF wird angezeigt
-- ✅ Temperaturanzeige funktioniert
-
-**Netzwerk-Test:**
+Network:
 ```bash
-# Ping auf Hostname (nach WiFi-Setup)
+# Ping hostname (after WiFi setup)
 ping knomi-t0.local
 
-# API-Test
+# API test
 curl http://knomi-t0.local/api/sleep/status
 ```
 
@@ -250,25 +176,22 @@ curl http://knomi-t0.local/api/sleep/status
 
 ## 🔄 Alternative: Combined Binary Flash
 
-Wenn du häufiger flashst, kannst du ein **Combined Binary** erstellen:
+If you flash often, you can create a combined binary:
 
-### Combined Binary erstellen
-
-1. Im Flash Download Tool:
-   - Aktiviere **CombineBin** ☑
-   - Konfiguriere alle 4 Dateien wie oben
-   - Klicke auf **CombineBin** (unten rechts)
-
-2. Es wird eine Datei erstellt:
-   - `combined_0x0.bin` (ca. 16 MB)
-
-3. Flashen mit einem einzigen Befehl:
+### Create combined binary
+1. In the Flash Download Tool:
+   - Enable **CombineBin** ☑
+   - Configure all 4 files as above
+   - Click **CombineBin** (bottom right)
+2. It creates a file like:
+   - `combined_0x0.bin` (~16 MB)
+3. Flash in one go:
    ```bash
    esptool.py --chip esp32s3 --port COM7 write_flash 0x0 combined_0x0.bin
    ```
 
-**Vorteil:** Schnelleres Flashen, nur eine Datei
-**Nachteil:** Größere Datei, immer kompletter Flash nötig
+**Pros:** Faster flashing, single file  
+**Cons:** Larger file, always a full flash
 
 ---
 

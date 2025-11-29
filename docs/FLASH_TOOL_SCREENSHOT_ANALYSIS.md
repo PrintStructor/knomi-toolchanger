@@ -1,32 +1,32 @@
-# Analyse deiner Flash-Konfiguration
+# Flash Tool Screenshot Analysis
 
-## ✅ Status: Flash erfolgreich!
+## ✅ Status: Flash successful!
 
-Der Screenshot zeigt **"FINISH"** (完成) - dein KNOMI V2 wurde erfolgreich geflasht!
+Your screenshot shows **"FINISH"** (完成) – the KNOMI V2 flashed correctly.
 
 ---
 
-## 📊 Deine Konfiguration im Detail
+## 📊 Your configuration
 
-### Datei-Offsets
+### File offsets
 
-| Datei | Dein Offset | Empfohlen | Status |
-|-------|-------------|-----------|--------|
-| `bootloader.bin` | `0x0000` | `0x1000` | ⚠️ Funktioniert, aber nicht Standard |
-| File 2 (partitions?) | `0x8000` | `0x8000` | ✅ Korrekt |
-| File 3 (firmware?) | `0x10000` | `0x10000` | ✅ Korrekt |
-| File 4 (littlefs?) | `0x710000` | `0x710000` | ✅ Korrekt |
+| File | Your Offset | Recommended | Status |
+|------|-------------|-------------|--------|
+| `bootloader.bin` | `0x0000` | `0x1000` | ⚠️ Works, but not the standard offset |
+| File 2 (partitions?) | `0x8000` | `0x8000` | ✅ Correct |
+| File 3 (firmware?) | `0x10000` | `0x10000` | ✅ Correct |
+| File 4 (littlefs?) | `0x710000` | `0x710000` | ✅ Correct |
 
-### Flash-Einstellungen
+### Flash settings
 
-| Einstellung | Dein Wert | Empfohlen | Performance-Impact |
-|-------------|-----------|-----------|-------------------|
-| **SPI SPEED** | `40MHz` | `80MHz` | ⚠️ 50% langsamer |
-| **SPI MODE** | `DIO` | `QIO` | ⚠️ Halb so viele Datenleitungen |
+| Setting | Yours | Recommended | Performance impact |
+|---------|-------|-------------|--------------------|
+| **SPI SPEED** | `40MHz` | `80MHz` | ⚠️ ~50% slower |
+| **SPI MODE** | `DIO` | `QIO` | ⚠️ Half the data lines |
 | **BAUD** | `921600` | `921600` | ✅ Optimal |
-| **DoNotChgBin** | ✅ Aktiviert | ☐ Deaktiviert | ⚠️ Meist nicht nötig |
+| **DoNotChgBin** | ✅ On | ☐ Off | ⚠️ Usually not needed |
 
-### Erkannte Hardware
+### Detected hardware
 
 ```
 Flash Vendor: C8h (GigaDevice)
@@ -35,7 +35,7 @@ Flash Size: QUAD 16MB ✅
 Crystal: 40MHz
 ```
 
-**MAC-Adressen:**
+**MAC addresses:**
 - AP: `CCBA9719DAD5`
 - STA: `CCBA9719DAD4`
 - BT: `CCBA9719DAD6`
@@ -43,150 +43,137 @@ Crystal: 40MHz
 
 ---
 
-## 🎯 Warum funktioniert es trotz Unterschieden?
+## 🎯 Why it works despite differences
 
-### 1. Bootloader bei 0x0000 statt 0x1000
+### 1) Bootloader at 0x0000 instead of 0x1000
 
-**Normalerweise:**
-- ESP32-S3 verwendet die ersten 4KB (0x0000-0x0FFF) für interne Strukturen
-- Bootloader sollte bei 0x1000 starten
+Normally:
+- ESP32-S3 reserves 0x0000–0x0FFF
+- Bootloader typically starts at 0x1000
 
-**Bei BTT KNOMI V2:**
-- BTT hat möglicherweise eine modifizierte Bootloader-Konfiguration
-- Oder: Es gab bereits einen Bootloader bei 0x1000 von einem vorherigen Flash
-- Die Firmware überschreibt 0x0000-0x0FFF nicht kritisch
+On KNOMI V2:
+- BTT may ship a layout that also works from 0x0000, or an existing bootloader at 0x1000 remains intact.
 
-**Empfehlung:**
-- Wenn es funktioniert, lasse es so ✅
-- Bei Problemen: Versuche Bootloader bei 0x1000
+Recommendation:
+- If it works, you can leave it ✅
+- If you hit boot issues later, try placing bootloader at 0x1000
 
-### 2. SPI SPEED 40MHz statt 80MHz
+### 2) SPI SPEED 40MHz instead of 80MHz
 
-**Auswirkung:**
-- **Bootzeit:** Minimal langsamer (nicht spürbar)
-- **Runtime-Performance:** Keine Auswirkung (nur beim Flash-Lesen)
-- **LVGL-Rendering:** Keine Auswirkung (wird aus RAM ausgeführt)
+Effect:
+- Boot: slightly slower (not really noticeable)
+- Runtime: none (runtime executes from RAM)
 
-**Vorteil von 40MHz:**
-- ✅ Stabiler bei langen Kabeln
-- ✅ Weniger anfällig für EMI (elektromagnetische Störungen)
-- ✅ Bessere Kompatibilität mit älteren Flash-Chips
+Pros of 40MHz:
+- ✅ More tolerant of cables/EMI
+- ✅ Compatible with more flash chips
 
-**Empfehlung:**
-- Für maximale Stabilität: 40MHz ✅ (deine Wahl)
-- Für maximale Performance: 80MHz
+Recommendation:
+- For stability: 40MHz ✅
+- For max speed: 80MHz
 
-### 3. SPI MODE DIO statt QIO
+### 3) SPI MODE DIO instead of QIO
 
-**DIO (Dual I/O):**
-- Verwendet 2 Datenleitungen
-- Bewährte, stabile Technologie
-- Ausreichend schnell für KNOMI
+DIO:
+- Uses 2 data lines; stable; fast enough for KNOMI.
 
-**QIO (Quad I/O):**
-- Verwendet 4 Datenleitungen
-- Doppelt so schnell theoretisch
-- Erfordert kompatiblen Flash-Chip
+QIO:
+- Uses 4 data lines; about 2x faster; requires compatible flash.
 
-**Dein Flash-Chip:** GigaDevice C8h unterstützt QIO ✅
+Your chip (GigaDevice C8h) supports QIO ✅
 
-**Empfehlung:**
-- Für maximale Stabilität: DIO ✅ (deine Wahl)
-- Für maximale Performance: QIO
+Recommendation:
+- For stability: DIO ✅
+- For max speed: QIO
 
 ---
 
-## 🚀 Optimierte Einstellungen (optional)
+## 🚀 Optimized settings (optional)
 
-Wenn du das nächste Mal flashst und maximale Performance willst:
-
+If you reflash and want maximum speed:
 ```
-SPI SPEED: 80MHz  (statt 40MHz)
-SPI MODE: QIO     (statt DIO)
-DoNotChgBin: ☐    (deaktivieren)
+SPI SPEED: 80MHz  (instead of 40MHz)
+SPI MODE: QIO     (instead of DIO)
+DoNotChgBin: ☐    (turn off)
 
-Offsets bleiben gleich:
-0x0000  - bootloader.bin  (funktioniert bei deinem KNOMI)
+Offsets stay the same:
+0x0000  - bootloader.bin  (works for your board)
 0x8000  - partitions.bin
 0x10000 - firmware.bin
 0x710000 - littlefs.bin
 ```
 
-**Performance-Gewinn:**
-- Flash-Lesen: ~2x schneller
-- Bootzeit: ~0.5s schneller
-- Runtime: Keine spürbare Änderung
+**Gain:**
+- Flash reads ~2x faster
+- Boot ~0.5s faster
+- Runtime unchanged
 
 ---
 
-## 🔍 Verifikation
+## 🔍 Verification
 
-### 1. Display-Test
+### 1) Display test
+- ✅ Boots and shows logo/GIF
+- ✅ Touch responds
+- ✅ WiFi AP mode starts (`KNOMI_AP_XXXXX`)
+- ✅ Temps display after Klipper connection
 
-**Prüfe folgende Punkte:**
-- ✅ Display startet und zeigt Logo/GIF
-- ✅ Touchscreen reagiert
-- ✅ WiFi AP-Modus startet (`KNOMI_AP_XXXXX`)
-- ✅ Temperaturanzeige funktioniert nach Klipper-Verbindung
-
-### 2. Serielle Ausgabe prüfen
-
-Verbinde mit 115200 Baud und prüfe:
+### 2) Serial output
+Connect at 115200 baud and expect:
 ```
 [Boot] KNOMI V2 Firmware v1.0.0
 [Boot] ESP32-S3-R8 (16MB Flash, 8MB PSRAM)
 [WiFi] Starting AP mode
 ```
 
-### 3. WiFi-Konfiguration
+### 3) WiFi setup
+1. Connect to `KNOMI_AP_XXXXX`
+2. Open `192.168.4.1`
+3. Enter WiFi credentials
+4. KNOMI reboots and joins
 
-1. Verbinde mit `KNOMI_AP_XXXXX`
-2. Navigiere zu `192.168.4.1`
-3. Gib WiFi-Credentials ein
-4. KNOMI startet neu und verbindet sich
-
-### 4. Netzwerk-Test (nach WiFi-Setup)
+### 4) Network test (after WiFi setup)
 
 ```bash
-# Hostname-Test
+# Hostname test
 ping knomi-t0.local
 
-# API-Test
+# API test
 curl http://knomi-t0.local/api/sleep/status
 ```
 
 ---
 
-## ⚡ Zusammenfassung
+## ⚡ Summary
 
-**Deine Konfiguration:**
-- ✅ **Funktioniert einwandfrei** (FINISH bestätigt)
-- ⚠️ **Nicht optimal** für Performance
-- ✅ **Sehr stabil** (konservative Einstellungen)
+Your config:
+- ✅ Works (FINISH confirmed)
+- ⚠️ Not performance-optimal
+- ✅ Very stable (conservative settings)
 
-**Nächste Schritte:**
-1. ✅ Flash war erfolgreich - Display sollte starten
-2. ✅ Konfiguriere WiFi über AP-Modus
-3. ✅ Verbinde mit Moonraker/Klipper
-4. (Optional) Bei nächstem Flash: 80MHz/QIO für bessere Performance
+Next steps:
+1. ✅ Flash succeeded – display should boot
+2. ✅ Configure WiFi via AP mode
+3. ✅ Connect to Moonraker/Klipper
+4. (Optional) Next flash: 80MHz/QIO for speed
 
-**Bei Problemen:**
-- Display startet nicht → Prüfe Stromversorgung
-- Kein WiFi-AP → Prüfe serielle Ausgabe
-- Touch funktioniert nicht → Kalibrierung über Web-Interface
+If issues:
+- No boot → check power
+- No AP → check serial output
+- Touch issues → use web UI to calibrate
 
 ---
 
 ## 📞 Support
 
-Wenn Probleme auftreten:
-1. Prüfe serielle Ausgabe (115200 Baud)
-2. Teste mit optimierten Einstellungen (80MHz/QIO)
-3. Erstelle GitHub Issue mit Screenshot und Serial Log
+If problems persist:
+1. Check serial output (115200 baud)
+2. Try optimized settings (80MHz/QIO)
+3. Open a GitHub issue with screenshot and serial log
 
 **GitHub:** https://github.com/PrintStructor/knomi-toolchanger/issues
 
 ---
 
-**Erstellt:** 29. November 2024
-**Basierend auf:** ESP32 Flash Download Tool v3.9.5 Screenshot
+**Created:** 28 January 2025  
+**Based on:** ESP32 Flash Download Tool v3.9.5 screenshot

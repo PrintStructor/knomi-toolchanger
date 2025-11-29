@@ -1,5 +1,10 @@
 # KNOMI Display Sleep & Wake System - Documentation
 
+> Note: This is the legacy overview. For the current guides see:
+> - User install/flash: `docs/DISPLAY_SLEEP_INSTALLATION.md`
+> - Klipper/Moonraker integration: `docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md`
+> - Developer/porting details: `docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md`
+
 ## Overview
 
 This document describes the implemented improvements for the BTT KNOMI Display Sleep/Wake System, including hardware sleep modes, improved reliability, and WiFi security.
@@ -411,6 +416,6 @@ Modifications under same license as original
 
 ---
 
-**Last Updated:** January 28, 2025
+**Last Updated:** October 25, 2025
 **Version:** 3.1
 **Status:** ✅ Production Ready

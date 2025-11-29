@@ -108,16 +108,16 @@ ACTIVE (awake)
 
 ## 🚀 Integration
 
-Complete guide see:
-- `docs/DISPLAY_SLEEP_INSTALLATION.md` - Step-by-step guide
-- `docs/DISPLAY_SLEEP_INTEGRATION.md` - Technical details
+Complete guides:
+- `docs/DISPLAY_SLEEP_INSTALLATION.md` - User build/flash steps and timeouts
+- `docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md` - Developer hooks and integration points
 
 **Quick Start:**
 
-1. Copy files to `/src/power_management/`
-2. Add includes in 4 files
-3. Insert API calls
-4. Build & Flash
+These files are already part of the firmware. To use the sleep system:
+1. Build/flash the firmware as in `docs/DISPLAY_SLEEP_INSTALLATION.md`
+2. Keep Moonraker reachable so wake-on-activity works
+3. If you are porting or modifying: follow the hook list in `docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md`
 
 ## 🧪 Testing
 

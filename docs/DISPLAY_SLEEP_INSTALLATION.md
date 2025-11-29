@@ -20,6 +20,7 @@
 ---
 
 ## Build & Flash
+> Note: With LittleFS this firmware does not support web/OTA uploads. Flash via USB using PlatformIO targets below (or the Espressif Flash Download Tool on Windows).
 
 ```bash
 git clone https://github.com/PrintStructor/knomi-toolchanger.git

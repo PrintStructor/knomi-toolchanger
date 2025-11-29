@@ -50,7 +50,7 @@ Initial release of the KNOMI display firmware for 6-tool VORON printers, featuri
 2. **Flash via USB:**
    ```bash
    esptool.py --chip esp32s3 --port /dev/ttyUSB0 write_flash 0x0 firmware_knomiv2_v1.0.0.bin
-   esptool.py --chip esp32s3 --port /dev/ttyUSB0 write_flash 0xa00000 littlefs_v1.0.0.bin
+   esptool.py --chip esp32s3 --port /dev/ttyUSB0 write_flash 0x710000 littlefs_v1.0.0.bin
    ```
 
 3. **Or use PlatformIO:**
@@ -125,7 +125,8 @@ Edit `src/power_management/display_sleep.h`:
 - [FEATURES.md](FEATURES.md) - Complete feature list
 - [CHANGELOG.md](CHANGELOG.md) - Detailed version history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [DISPLAY_SLEEP_README.md](DISPLAY_SLEEP_README.md) - Power management deep-dive
+- [docs/DISPLAY_SLEEP_INSTALLATION.md](docs/DISPLAY_SLEEP_INSTALLATION.md) - User install & sleep usage
+- [docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md) - Developer/porting details
 
 ---
 
