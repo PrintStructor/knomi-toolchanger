@@ -360,8 +360,13 @@ Key documents:
 - [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Optional temp graph cleanup
 
 ### Technical Documentation
-- [docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md) - Developer/porting notes for the sleep system
-- [TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
+- [docs/dev/](docs/dev/README.md) - Developer documentation overview
+- [docs/dev/UI_CUSTOMIZATION.md](docs/dev/UI_CUSTOMIZATION.md) - LVGL layer architecture, widgets, and GIF integration
+- [docs/dev/PRINT_PROGRESS_FEATURE.md](docs/dev/PRINT_PROGRESS_FEATURE.md) - Print progress system, PSRAM management, overlays
+- [docs/dev/HYBRID_DISPLAY.md](docs/dev/HYBRID_DISPLAY.md) - State machine, screen transitions, Klipper integration
+- [docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md](docs/dev/DISPLAY_SLEEP_IMPLEMENTATION.md) - Power management hooks and timers
+- [docs/FLASH_TOOL_GUIDE.md](docs/FLASH_TOOL_GUIDE.md) - ESP32 Flash Download Tool guide
+- [docs/TEMP_GRAPH_FIX.md](docs/TEMP_GRAPH_FIX.md) - Temperature display fixes
 - [src/power_management/](https://github.com/PrintStructor/knomi-toolchanger/tree/firmware/src/power_management) - Sleep API reference (firmware branch)
 
 ---
