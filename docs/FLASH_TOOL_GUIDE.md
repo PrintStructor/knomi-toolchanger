@@ -195,9 +195,9 @@ If you flash often, you can create a combined binary:
 
 ---
 
-## 📁 Verzeichnisstruktur für Flash-Dateien
+## 📁 Recommended File Organization
 
-Empfohlene Organisation:
+Suggested folder structure:
 
 ```
 KNOMI_Flash/
@@ -207,79 +207,79 @@ KNOMI_Flash/
 │   ├── firmware_knomiv2_v1.0.0.bin
 │   └── littlefs.bin
 ├── flash_download_tool_3.9.5.exe
-└── README.txt (diese Anleitung)
+└── README.txt (this guide)
 ```
 
 ---
 
-## ⚙️ Nur Firmware updaten (ohne littlefs)
+## ⚙️ Firmware-Only Update (Keep LittleFS)
 
-Wenn du nur die Firmware aktualisierst und die GIFs behalten willst:
+If you only want to update firmware and keep existing GIFs/WiFi settings:
 
-**Flash nur diese Datei:**
+**Flash only this file:**
 - `firmware_knomiv2_v1.0.0.bin` @ `0x10000`
 
-**Deaktiviere die anderen:**
+**Disable the others:**
 - ☐ bootloader.bin
 - ☐ partitions.bin
 - ☐ littlefs.bin
 
-**Vorteil:** Schneller Update (~30 Sekunden)
-**Nutzen:** WiFi-Einstellungen und GIFs bleiben erhalten
+**Benefit:** Faster update (~30 seconds)
+**Preserves:** WiFi credentials and custom GIFs
 
 ---
 
-## 🚀 Fortgeschrittene Optionen
+## 🚀 Advanced Options
 
-### DoNotChgBin Erklärung
+### DoNotChgBin Explained
 
-**Wenn aktiviert (☑):**
-- Originale Binary wird verwendet (keine Modifikation)
-- Für signierte Firmwares erforderlich
+**When enabled (☑):**
+- Original binary is used (no modification)
+- Required for signed firmware
 
-**Für KNOMI V2:** Normalerweise deaktiviert lassen (☐)
+**For KNOMI V2:** Usually leave disabled (☐)
 
-### SPI Mode Erklärung
+### SPI Mode Explained
 
-| Modus | Beschreibung | Geschwindigkeit |
-|-------|--------------|-----------------|
-| QIO | Quad I/O (4 Datenleitungen) | **Schnellste** |
-| QOUT | Quad Output | Schnell |
+| Mode | Description | Speed |
+|------|-------------|-------|
+| QIO | Quad I/O (4 data lines) | **Fastest** |
+| QOUT | Quad Output | Fast |
 | DIO | Dual I/O | Standard |
-| DOUT | Dual Output | Langsam |
+| DOUT | Dual Output | Slow |
 
-**Empfehlung:** QIO verwenden (wie in platformio.ini konfiguriert)
+**Recommendation:** Use QIO (as configured in platformio.ini)
 
-### Baud Rate Wahl
+### Baud Rate Selection
 
-| Baudrate | Dauer | Stabilität |
-|----------|-------|------------|
-| 921600 | ~2 min | Gut (empfohlen) |
-| 460800 | ~3 min | Sehr gut |
-| 115200 | ~10 min | Exzellent (bei Problemen) |
+| Baud Rate | Duration | Stability |
+|-----------|----------|-----------|
+| 921600 | ~2 min | Good (recommended) |
+| 460800 | ~3 min | Very good |
+| 115200 | ~10 min | Excellent (for troubleshooting) |
 
 ---
 
 ## 📞 Support
 
-**Bei Problemen:**
-1. Prüfe, dass alle Offsets korrekt sind
-2. Verwende ein gutes USB-Kabel
-3. Reduziere Baudrate auf 115200
-4. Prüfe Geräte-Manager für COM-Port
+**If you encounter issues:**
+1. Verify all offsets are correct
+2. Use a quality USB data cable
+3. Reduce baud rate to 115200
+4. Check Device Manager for COM port
 
 **GitHub Issues:** https://github.com/PrintStructor/knomi-toolchanger/issues
 
 ---
 
-## 📄 Referenzen
+## 📄 References
 
-- [Espressif Flash Download Tool Dokumentation](https://www.espressif.com/sites/default/files/tools/flash_download_tool_v3.9.5_0.pdf)
+- [Espressif Flash Download Tool Documentation](https://www.espressif.com/sites/default/files/tools/flash_download_tool_v3.9.5_0.pdf)
 - [ESP32-S3 Technical Reference](https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf)
 - [KNOMI V2 GitHub Repository](https://github.com/PrintStructor/knomi-toolchanger)
 
 ---
 
 **Version:** 1.0.0
-**Letztes Update:** 29. November 2024
-**Autor:** PrintStructor
+**Last Updated:** December 2, 2025
+**Author:** PrintStructor
