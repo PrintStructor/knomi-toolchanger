@@ -8,6 +8,10 @@
 
 Advanced firmware for BigTreeTech KNOMI displays with multi-toolhead support, intelligent power management, and Klipper integration.
 
+<p align="center">
+  <img src="docs/images/KNOMI-6-TC.GIF" alt="KNOMI 6-Toolhead Display System" width="600">
+</p>
+
 > **🔧 Part of the [Klipper Toolchanger Extended](https://github.com/PrintStructor/klipper-toolchanger-extended) ecosystem**
 >
 > This firmware is specifically designed for 6-tool VORON printers using the Klipper Toolchanger Extended framework. Each KNOMI display provides real-time status visualization for its respective toolhead, including:
@@ -16,8 +20,6 @@ Advanced firmware for BigTreeTech KNOMI displays with multi-toolhead support, in
 > - Print progress with per-tool statistics
 > - Synchronized sleep/wake across all 6 displays
 > - Seamless integration with toolchanger macros and safety features
->
-> **Screenshot placeholder:** `docs/images/KNOMI-6-TC.GIF` (overview of the KNOMI UI)
 
 ---
 
