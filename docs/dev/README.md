@@ -14,6 +14,7 @@ Welcome to the KNOMI V2 developer documentation. This directory contains technic
 | **[PRINT_PROGRESS_FEATURE.md](PRINT_PROGRESS_FEATURE.md)** | Print progress system deep-dive | PSRAM management, layer compositing, Moonraker integration, tool indicators |
 | **[HYBRID_DISPLAY.md](HYBRID_DISPLAY.md)** | State machine & screen switching | Display states, state transitions, GIF management, Klipper integration |
 | **[DISPLAY_SLEEP_IMPLEMENTATION.md](DISPLAY_SLEEP_IMPLEMENTATION.md)** | Power management system | Sleep modes, hooks, timer management, API implementation |
+| **[WIFI_TROUBLESHOOTING.md](WIFI_TROUBLESHOOTING.md)** | WiFi connectivity & recovery | Auto-reconnect logic, remote restart API, debugging WiFi issues |
 
 ---
 
@@ -36,6 +37,7 @@ Welcome to the KNOMI V2 developer documentation. This directory contains technic
 | **Modify progress display** | [PRINT_PROGRESS_FEATURE.md](PRINT_PROGRESS_FEATURE.md#layer-system) | Layer architecture, PSRAM |
 | **Add power management** | [DISPLAY_SLEEP_IMPLEMENTATION.md](DISPLAY_SLEEP_IMPLEMENTATION.md#hooks) | Sleep hooks, timers |
 | **Change color themes** | [UI_CUSTOMIZATION.md](UI_CUSTOMIZATION.md#color-themes) | Tool colors, gradients |
+| **Fix WiFi connectivity** | [WIFI_TROUBLESHOOTING.md](WIFI_TROUBLESHOOTING.md) | Auto-reconnect, remote restart, debugging |
 
 ---
 
@@ -139,6 +141,72 @@ This enables:
 - **Synchronized sleep/wake** across all 6 displays
 
 **Learn more:** [UI_CUSTOMIZATION.md](UI_CUSTOMIZATION.md#tool-specific-colors)
+
+---
+
+## 🌐 HTTP API Reference
+
+The KNOMI V2 exposes several HTTP endpoints for remote control and monitoring.
+
+### Power Management & Sleep
+
+```bash
+# Put display to sleep
+curl -X POST http://knomi-t0.local/api/sleep
+
+# Wake display
+curl -X POST http://knomi-t0.local/api/wake
+
+# Check sleep status
+curl http://knomi-t0.local/api/sleep/status
+```
+
+**Response:**
+```json
+{
+  "sleeping": false,
+  "state": "active",
+  "mode": "klipper_sync"
+}
+```
+
+**Learn more:** [DISPLAY_SLEEP_IMPLEMENTATION.md](DISPLAY_SLEEP_IMPLEMENTATION.md#api-endpoints)
+
+---
+
+### Remote Restart (v1.1.0+)
+
+```bash
+# Restart display without power cycling
+curl -X POST http://knomi-t0.local/api/restart
+```
+
+**Response:**
+```json
+{"status":"restarting"}
+```
+
+**Use case:** When display loses WiFi connection and becomes unresponsive.
+
+**Learn more:** [WIFI_TROUBLESHOOTING.md](WIFI_TROUBLESHOOTING.md#manual-recovery-options)
+
+---
+
+### Batch Operations
+
+```bash
+# Restart all 6 displays in parallel
+for i in {0..5}; do
+  curl -X POST http://knomi-t$i.local/api/restart &
+done
+wait
+
+# Put all displays to sleep
+for i in {0..5}; do
+  curl -X POST http://knomi-t$i.local/api/sleep &
+done
+wait
+```
 
 ---
 
@@ -409,6 +477,17 @@ Serial.printf("PSRAM: %s\n", psramFound() ? "FOUND" : "NOT FOUND");
 Serial.printf("PSRAM Size: %u bytes\n", ESP.getPsramSize());
 Serial.printf("PSRAM Free: %u bytes\n", ESP.getFreePsram());
 ```
+
+### Q: Display loses WiFi connection and becomes unresponsive. What do I do?
+
+**A:** Starting with v1.1.0, the display automatically reconnects (3 attempts, 5s interval). If that fails, use:
+
+```bash
+# Remote restart (no power cycling needed)
+curl -X POST http://knomi-t0.local/api/restart
+```
+
+**Learn more:** [WIFI_TROUBLESHOOTING.md](WIFI_TROUBLESHOOTING.md)
 
 ---
 
