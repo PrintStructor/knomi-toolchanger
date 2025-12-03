@@ -9,7 +9,7 @@
 Advanced firmware for BigTreeTech KNOMI displays with multi-toolhead support, intelligent power management, and Klipper integration.
 
 <p align="center">
-  <img src="docs/images//KNOMI-6-TC_720.gif" alt="KNOMI 6-Toolhead Display System" width="720">
+  <img src="docs/images/KNOMI-6-TC_720.gif" alt="KNOMI 6-Toolhead Display System">
 </p>
 
 > **🔧 Part of the [Klipper Toolchanger Extended](https://github.com/PrintStructor/klipper-toolchanger-extended) ecosystem**
