@@ -246,24 +246,31 @@ void webserver_setup(void) {
         bool is_sleeping = display_is_sleeping();
         display_sleep_state_t state = display_get_state();
         display_sleep_mode_t mode = display_sleep_get_mode();
-        
-        String state_str = 
+
+        String state_str =
             (state == DISPLAY_STATE_ACTIVE) ? "active" :
             (state == DISPLAY_STATE_IDLE) ? "idle" : "sleeping";
-        
-        String mode_str = 
+
+        String mode_str =
             (mode == SLEEP_MODE_MANUAL) ? "manual" :
             (mode == SLEEP_MODE_KLIPPER_SYNC) ? "klipper_sync" : "led_sync";
-        
+
         String json = "{";
         json += "\"sleeping\":" + String(is_sleeping ? "true" : "false") + ",";
         json += "\"state\":\"" + state_str + "\",";
         json += "\"mode\":\"" + mode_str + "\"";
         json += "}";
-        
+
         request->send(200, "application/json", json);
     });
-    
+
+    // Restart endpoint - useful when display loses WiFi connection
+    server.on("/api/restart", HTTP_POST, [](AsyncWebServerRequest *request){
+        request->send(200, "application/json", "{\"status\":\"restarting\"}");
+        delay(100);  // Give time for response to be sent
+        ESP.restart();
+    });
+
     server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
     server.begin();
 }

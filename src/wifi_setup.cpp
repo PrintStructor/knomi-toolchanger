@@ -331,23 +331,60 @@ void wifi_task(void * parameter) {
     WiFi.scanNetworks(true, false, true, 75U);
     webserver_setup();
 
+    static uint32_t last_reconnect_attempt = 0;
+    static uint8_t reconnect_attempts = 0;
+    const uint32_t RECONNECT_INTERVAL = 5000;  // Try to reconnect every 5 seconds
+    const uint8_t MAX_RECONNECT_ATTEMPTS = 3;   // Max attempts before switching to AP mode
+
     while (1) {
         wifi_scan_refresh();
         wifi_config_loop(false);
 
         wl_status_t s = WiFi.status();
+        wifi_mode_t m = WiFi.getMode();
+
         switch (s) {
             case WL_CONNECTED:
                 wifi_status = WIFI_STATUS_CONNECTED;
+                reconnect_attempts = 0;  // Reset counter on successful connection
                 break;
+
             case WL_NO_SSID_AVAIL:
             case WL_DISCONNECTED:
-                if (wifi_status == WIFI_STATUS_CONNECTED)
+                if (wifi_status == WIFI_STATUS_CONNECTED) {
                     wifi_status = WIFI_STATUS_DISCONNECT;
+                    Serial.println("WiFi disconnected! Starting auto-reconnect...");
+                    last_reconnect_attempt = 0;  // Trigger immediate reconnect
+                }
+
+                // Auto-reconnect logic for STA mode
+                if ((m == WIFI_MODE_STA || m == WIFI_MODE_APSTA) &&
+                    knomi_config.sta_ssid[0] != 0) {
+
+                    uint32_t now = millis();
+                    if (now - last_reconnect_attempt >= RECONNECT_INTERVAL) {
+                        last_reconnect_attempt = now;
+                        reconnect_attempts++;
+
+                        if (reconnect_attempts <= MAX_RECONNECT_ATTEMPTS) {
+                            Serial.printf("WiFi reconnect attempt %d/%d...\n",
+                                         reconnect_attempts, MAX_RECONNECT_ATTEMPTS);
+                            WiFi.disconnect();
+                            delay(100);
+                            WiFi.begin(knomi_config.sta_ssid, knomi_config.sta_pwd);
+                            wifi_status = WIFI_STATUS_CONNECTING;
+                        } else {
+                            // After max attempts, switch to AP mode for user intervention
+                            Serial.println("Max reconnect attempts reached. Switching to AP mode.");
+                            strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
+                            knomi_config_require |= WEB_POST_WIFI_CONFIG_MODE;
+                            reconnect_attempts = 0;
+                        }
+                    }
+                }
                 break;
         }
 
-        wifi_mode_t m = WiFi.getMode();
         if (m == WIFI_MODE_AP || m == WIFI_MODE_APSTA) {
             dnsServer.processNextRequest();
         }
