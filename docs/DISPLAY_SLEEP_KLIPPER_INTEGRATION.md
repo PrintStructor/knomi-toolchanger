@@ -17,21 +17,20 @@ These fields drive wake decisions in `lv_moonraker_change_screen.cpp`.
 ---
 
 ## Required Klipper Config
-1) **Include the KNOMI macro files**
-- Copy `knomi.cfg` and `macros.cfg` into your Klipper config directory and include them from `printer.cfg`:
+1) **Include the KNOMI macro file**
+- Copy `KNOMI.cfg` into your Klipper config directory and include it from `printer.cfg`:
   ```ini
-  [include knomi.cfg]
-  [include macros.cfg]
+  [include KNOMI.cfg]
   ```
-- `_KNOMI_STATUS` is defined in `knomi.cfg` and receives updates from the macro overrides below.
+- `_KNOMI_STATUS` is defined in `KNOMI.cfg` and receives updates from the macro overrides below.
 
 2) **Macro overrides that set the flags**
-- `G28` sets `homing`
-- `BED_MESH_CALIBRATE` sets `probing`
-- `QUAD_GANTRY_LEVEL` sets `qgling`
-- `M109` sets `heating_nozzle`
-- `M190` sets `heating_bed`
-- Print start/end handling lives in `macros.cfg` (`PRINT_START`/`PRINT_END`); printing state is also read directly from Moonraker.
+- `G28` sets `homing` (defined in KNOMI.cfg)
+- `BED_MESH_CALIBRATE` sets `probing` (defined in KNOMI.cfg)
+- `M109` sets `heating_nozzle` (defined in KNOMI.cfg)
+- `M190` sets `heating_bed` (defined in KNOMI.cfg)
+- For `QUAD_GANTRY_LEVEL`, `PRINT_START`, `PRINT_END`, etc.: See `klipper_integration_example.cfg` for integration examples to add to your existing macros.
+- Printing state is also read directly from Moonraker.
 
 3) **Network reachability**
 - KNOMI must reach Moonraker over HTTP. Verify with:

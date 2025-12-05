@@ -158,24 +158,22 @@ pio run -e knomiv2 -t uploadfs
 
 **Option 1: Copy config files to Klipper directory**
 ```bash
-# Copy to your Klipper config directory (from firmware branch)
-cp knomi.cfg macros.cfg ~/printer_data/config/
+# Copy KNOMI.cfg to your Klipper config directory
+cp KNOMI.cfg ~/printer_data/config/
 ```
 
 Then add to your `printer.cfg`:
 ```ini
-[include knomi.cfg]
-[include macros.cfg]
+[include KNOMI.cfg]
 ```
 
 **Option 2: Use absolute path**
 ```ini
-[include /path/to/knomi-toolchanger/knomi.cfg]
-[include /path/to/knomi-toolchanger/macros.cfg]
+[include /path/to/knomi-toolchanger/KNOMI.cfg]
 ```
 
-> **Note:** The `knomi.cfg` file contains G-code macro overrides for display integration.
-> The `macros.cfg` file includes toolchanger-specific macros and QGL integration.
+> **Note:** The `KNOMI.cfg` file contains G-code macro overrides for display integration.
+> For integration examples (PRINT_START, QGL, etc.), see `klipper_integration_example.cfg`
 
 For detailed Klipper setup, see [DISPLAY_SLEEP_KLIPPER_INTEGRATION.md](docs/DISPLAY_SLEEP_KLIPPER_INTEGRATION.md).
 

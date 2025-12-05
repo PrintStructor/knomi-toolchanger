@@ -64,9 +64,10 @@ Initial release of the KNOMI display firmware for 6-tool VORON printers, featuri
 Add to your `printer.cfg`:
 
 ```ini
-[include knomi.cfg]
-[include macros.cfg]
+[include KNOMI.cfg]
 ```
+
+> **Note (v1.1.1+):** `macros.cfg` has been removed. See `klipper_integration_example.cfg` for integration examples.
 
 See [Installation Guide](docs/DISPLAY_SLEEP_INSTALLATION.md) for detailed setup.
 
