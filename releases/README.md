@@ -24,11 +24,11 @@ This folder contains pre-compiled firmware binaries for KNOMI V2 displays, ready
 cd releases/v1.1.0/
 esptool.py --chip esp32s3 --port /dev/ttyUSB0 --baud 921600 \
   --before default_reset --after hard_reset write_flash -z \
-  --flash_mode dio --flash_freq 80m --flash_size 16MB \
-  0x0 bootloader.bin \
+  --flash_mode qio --flash_freq 80m --flash_size 16MB \
+  0x0000 bootloader.bin \
   0x8000 partitions.bin \
   0x10000 firmware.bin \
-  0x310000 littlefs.bin
+  0x710000 littlefs.bin
 ```
 
 ### Firmware-Only Update

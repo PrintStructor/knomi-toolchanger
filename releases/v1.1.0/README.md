@@ -40,11 +40,11 @@ pip install esptool
 ```bash
 esptool.py --chip esp32s3 --port /dev/ttyUSB0 --baud 921600 \
   --before default_reset --after hard_reset write_flash -z \
-  --flash_mode dio --flash_freq 80m --flash_size 16MB \
-  0x0 bootloader.bin \
+  --flash_mode qio --flash_freq 80m --flash_size 16MB \
+  0x0000 bootloader.bin \
   0x8000 partitions.bin \
   0x10000 firmware.bin \
-  0x310000 littlefs.bin
+  0x710000 littlefs.bin
 ```
 
 **Note:** Replace `/dev/ttyUSB0` with your serial port:
@@ -71,10 +71,10 @@ This preserves your WiFi credentials and Moonraker configuration.
 
 | Address | Size | Contents |
 |---------|------|----------|
-| 0x0 | 15KB | Bootloader |
+| 0x0000 | 15KB | Bootloader |
 | 0x8000 | 3KB | Partition Table |
 | 0x10000 | 2.8MB | Firmware Application |
-| 0x310000 | 8.9MB | LittleFS Filesystem (GIFs) |
+| 0x710000 | 8.9MB | LittleFS Filesystem (GIFs) |
 
 ## 🔍 Verification
 
