@@ -26,11 +26,11 @@ Detailed steps to flash KNOMI V2 firmware with the Espressif Flash Download Tool
 > The shown configuration works but is not optimal. See recommended settings below.
 
 ### Firmware files
-Obtain these 4 files from [Release v1.0.0](https://github.com/PrintStructor/knomi-toolchanger/releases/tag/v1.0.0):
+Obtain these 4 files from [Release v1.1.0](https://github.com/PrintStructor/knomi-toolchanger/releases/tag/v1.1.0):
 
 1. `bootloader.bin`
 2. `partitions.bin`
-3. `firmware_knomiv2_v1.0.0.bin`
+3. `firmware.bin`
 4. `littlefs.bin`
 
 ---
@@ -48,39 +48,38 @@ Obtain these 4 files from [Release v1.0.0](https://github.com/PrintStructor/knom
 
 | File | Offset (Hex) | Checkbox | Description |
 |------|--------------|----------|-------------|
-| `bootloader.bin` | `0x1000` ⚠️ | ✅ | ESP32-S3 bootloader |
+| `bootloader.bin` | `0x0000` | ✅ | ESP32-S3 bootloader |
 | `partitions.bin` | `0x8000` | ✅ | Partition table |
-| `firmware_knomiv2_v1.0.0.bin` | `0x10000` | ✅ | Main firmware |
+| `firmware.bin` | `0x10000` | ✅ | Main firmware |
 | `littlefs.bin` | `0x710000` | ✅ | Filesystem (GIFs) |
 
-⚠️ **Bootloader offset:**
-- Standard ESP32-S3: `0x1000` (recommended)
-- KNOMI V2 can also work at `0x0000` (as in some screenshots)
-- Recommendation: use `0x1000` for maximum compatibility.
+⚠️ **Critical:** These offsets are required for KNOMI V2 to boot correctly.
 
 Reference layout:
 ```
-[✅] bootloader.bin               @ 0x1000  (or 0x0000 on some KNOMI V2 boards)
-[✅] partitions.bin               @ 0x8000
-[✅] firmware_knomiv2_v1.0.0.bin  @ 0x10000
-[✅] littlefs.bin                 @ 0x710000
+[✅] bootloader.bin  @ 0x0000
+[✅] partitions.bin  @ 0x8000
+[✅] firmware.bin    @ 0x10000
+[✅] littlefs.bin    @ 0x710000
 ```
 
 ### Step 3: Flash settings
 
-Recommended (faster):
+**Recommended (optimal performance):**
 | Setting | Value | Why |
 |---------|-------|-----|
 | **SPI SPEED** | `80MHz` | Fastest for KNOMI V2 |
-| **SPI MODE** | `QIO` | Quad I/O |
+| **SPI MODE** | `QIO` | ⚠️ **REQUIRED for full speed** - 4 data lines |
 | **FLASH SIZE** | `16MB` | Detected automatically |
 | **BAUD** | `921600` | Fast upload |
 
-Compatible but slower:
-| Setting | Value |
-|---------|-------|
-| **SPI SPEED** | `40MHz` |
-| **SPI MODE** | `DIO` |
+**Alternative (slower display performance):**
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **SPI SPEED** | `40MHz` | Works but slower |
+| **SPI MODE** | `DIO` | Works but display runs slower (2 data lines) |
+
+> **Important:** DIO mode works but causes reduced display performance. Always use QIO for best results!
 
 ### Step 4: Flash options
 
@@ -201,10 +200,10 @@ Suggested folder structure:
 
 ```
 KNOMI_Flash/
-├── v1.0.0/
+├── v1.1.0/
 │   ├── bootloader.bin
 │   ├── partitions.bin
-│   ├── firmware_knomiv2_v1.0.0.bin
+│   ├── firmware.bin
 │   └── littlefs.bin
 ├── flash_download_tool_3.9.5.exe
 └── README.txt (this guide)
@@ -217,7 +216,7 @@ KNOMI_Flash/
 If you only want to update firmware and keep existing GIFs/WiFi settings:
 
 **Flash only this file:**
-- `firmware_knomiv2_v1.0.0.bin` @ `0x10000`
+- `firmware.bin` @ `0x10000`
 
 **Disable the others:**
 - ☐ bootloader.bin
@@ -280,6 +279,6 @@ If you only want to update firmware and keep existing GIFs/WiFi settings:
 
 ---
 
-**Version:** 1.0.0
-**Last Updated:** December 2, 2025
+**Version:** 1.1.0
+**Last Updated:** December 5, 2025
 **Author:** PrintStructor
