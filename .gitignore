@@ -1,2 +1,6 @@
 # macOS
 .DS_Store
+
+# User-specific Klipper configuration
+MACROS.cfg
+macros.cfg
