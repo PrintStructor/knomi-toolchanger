@@ -91,27 +91,122 @@ Reference layout:
 
 ---
 
-## ⚡ Flash Process
+## ⚡ Step-by-Step Flash Process (Visual Guide)
 
-### 1) Prepare the KNOMI
-1. Connect KNOMI via USB-C to your PC.
-2. Hold **BOOT** (if present).
-3. Tap **RESET** while holding BOOT.
-4. Release BOOT → ESP32 enters download mode.  
-   (Some boards enter download mode automatically when USB is connected.)
+### Step 1: ERASE - Clear the Flash Memory
 
-### 2) Identify COM port
-- Windows Device Manager → “Ports (COM & LPT)” → note the COM number.
-- Select that COM port in the Flash Tool dropdown.
+**Why:** Always erase before flashing to prevent corruption from previous data.
 
-### 3) Start flashing
-1. Click **START**.
-2. Progress should show writing at each offset and finish with **FINISH**.
-3. Typical duration: ~2–4 minutes depending on baud/USB.
+![Step 1: ERASE](images/flash_tool_example_1_erase.png)
 
-### 4) Finish
-1. When you see **FINISH** in green, flashing succeeded.
-2. Unplug USB, plug back in → KNOMI boots the new firmware.
+**Actions:**
+1. Configure all 4 files with correct offsets (as shown above)
+2. Select **ERASE** button
+3. Click **START**
+4. Wait for erase to complete
+
+![Step 1 Shell Output](images/flash_tool_example_1_erase_shell.png)
+
+Expected output: `FINISH` in green indicates successful erase.
+
+---
+
+### Step 2: START - Flash the Firmware
+
+**Why:** Write all 4 binary files to the ESP32 flash.
+
+![Step 2: START](images/flash_tool_example_2_start.png)
+
+**Actions:**
+1. Verify all 4 checkboxes are enabled
+2. Verify SPI MODE = QIO, SPI SPEED = 80MHz
+3. Click **START**
+4. Wait for flashing to complete (~2-4 minutes)
+
+![Step 2 Shell Output](images/flash_tool_example_2_start_shell.png)
+
+Expected output: Progress bars for each file, finishing with `FINISH` in green.
+
+---
+
+### Step 3: STOP - Flashing Complete
+
+![Step 3: STOP](images/flash_tool_example_3_stop.png)
+
+**Actions:**
+1. Verify `FINISH` appears in green
+2. Click **STOP** to release the COM port
+3. **Do not disconnect USB yet!**
+
+---
+
+### Step 4: Open New PowerShell Tab for Debugging
+
+**Why:** Monitor serial output to verify successful boot.
+
+![Step 4: New PowerShell](images/flash_tool_example_4_new_shell.png)
+
+**Actions:**
+1. Open new PowerShell window/tab
+2. Keep the Flash Tool open in background
+
+---
+
+### Step 5: Run miniterm for Serial Debugging
+
+![Step 5: miniterm command](images/flash_tool_example_5_new_prompt.png)
+
+**Actions:**
+```bash
+python -m serial.tools.miniterm COM4 115200
+```
+
+Replace `COM4` with your actual COM port number.
+
+---
+
+### Step 6: Verify Boot Debug Output
+
+![Step 6: Debug Output](images/flash_tool_example_6_DEBUG_output.png)
+
+**Expected output:**
+- ESP32-S3 boot messages
+- KNOMI firmware version
+- WiFi initialization
+- Display initialization
+- LittleFS mount success
+- AP mode startup: `KNOMI_AP_XXXXX`
+
+**To exit miniterm:**
+- Press `CTRL + ]` (or `CTRL + T` followed by `Q`)
+
+---
+
+### Step 7: Connect to WiFi and Configure
+
+![Step 7: WiFi Setup](images/wifi_setup_7.png)
+
+**Actions:**
+1. **Disconnect USB** from KNOMI
+2. **Connect to WiFi**: Look for `BTT-KNOMI` or `KNOMI_AP_XXXXX` network
+3. **Open browser**: Navigate to `http://192.168.4.1`
+4. **Configure settings**:
+   - **Klipper IP**: Enter your Klipper/Moonraker IP address
+   - **Klipper Port**: Usually `80` (default)
+   - **Tool ID**: Enter tool number (0-5) for this display
+   - **Hostname**: Will be `knomi-t0.local` through `knomi-t5.local`
+   - **Select WiFi**: Choose your network from the SSID list
+   - **Enter Password**: WiFi password
+5. **Submit**: KNOMI will restart and connect to your network
+
+**Verification:**
+```bash
+# Test connectivity after WiFi setup
+ping knomi-t0.local
+
+# Test API
+curl http://knomi-t0.local/api/sleep/status
+```
 
 ---
 
@@ -122,54 +217,6 @@ Reference layout:
 - **"Write failed at 0xXXXXX":** Try another USB data cable/port; lower baud to `460800` or `115200`.
 - **"COM Port not found":** Install the USB-UART driver for your board (CP210x or CH340, depending on variant).
 - **"Invalid partition table":** Ensure `partitions.bin` is at `0x8000` and other offsets match the table above.
-
----
-
-## 📊 Post-Flash Verification
-
-### 1) Serial monitor (optional)
-Connect at 115200 baud and check boot logs:
-
-```bash
-# Using PlatformIO
-pio device monitor -b 115200
-
-# Using Arduino IDE
-Tools → Serial Monitor → 115200 baud
-```
-
-Expected output:
-```
-[Boot] KNOMI V2 Firmware v1.0.0
-[Boot] ESP32-S3-R8 (16MB Flash, 8MB PSRAM)
-[WiFi] Booting into AP mode: KNOMI_AP_XXXXX
-[Display] GC9A01 initialized
-[FS] LittleFS mounted successfully
-[FS] Loading GIF for tool X from /gifs/tool_X.gif
-```
-
-### 2) WiFi setup
-1. After flashing, KNOMI starts in **AP mode**: `KNOMI_AP_XXXXX`.
-2. Connect to that WiFi.
-3. Open `192.168.4.1`.
-4. Enter your WiFi credentials.
-5. KNOMI reboots and joins your network.
-
-### 3) Functional check
-
-Display:
-- ✅ Touch responds
-- ✅ Standby GIF shows
-- ✅ Temperature display works
-
-Network:
-```bash
-# Ping hostname (after WiFi setup)
-ping knomi-t0.local
-
-# API test
-curl http://knomi-t0.local/api/sleep/status
-```
 
 ---
 
