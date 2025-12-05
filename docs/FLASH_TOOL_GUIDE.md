@@ -85,7 +85,7 @@ Reference layout:
 
 | Option | Recommended | Notes |
 |--------|-------------|-------|
-| **DoNotChgBin** | ☐ | Usually leave off |
+| **DoNotChgBin** | ☑ | ⚠️ **Must be enabled** - Preserves binary integrity |
 | **CombineBin** | ☐ | Not needed here |
 | **LockSettings** | ☐ | Leave off |
 
