@@ -19,13 +19,7 @@ Detailed steps to flash KNOMI V2 firmware with the Espressif Flash Download Tool
 
 ---
 
-## 🖼️ Screenshot Reference
-
-![ESP32 Flash Tool Settings](https://raw.githubusercontent.com/PrintStructor/knomi-toolchanger/firmware/docs/images/flash_tool_example.png)
-
-> The shown configuration works but is not optimal. See recommended settings below.
-
-### Firmware files
+## 📦 Firmware files
 Obtain these 4 files from [Release v1.1.0](https://github.com/PrintStructor/knomi-toolchanger/releases/tag/v1.1.0):
 
 1. `bootloader.bin`
@@ -107,8 +101,6 @@ Reference layout:
 
 ![Step 1 Shell Output](images/flash_tool_example_1_erase_shell.png)
 
-Expected output: `FINISH` in green indicates successful erase.
-
 ---
 
 ### Step 2: START - Flash the Firmware
@@ -124,8 +116,6 @@ Expected output: `FINISH` in green indicates successful erase.
 4. Wait for flashing to complete (~2-4 minutes)
 
 ![Step 2 Shell Output](images/flash_tool_example_2_start_shell.png)
-
-Expected output: Progress bars for each file, finishing with `FINISH` in green.
 
 ---
 
@@ -156,6 +146,10 @@ Expected output: Progress bars for each file, finishing with `FINISH` in green.
 
 ![Step 5: miniterm command](images/flash_tool_example_5_new_prompt.png)
 
+**Prerequisites:**
+- Python must be installed on your system
+- Install pyserial if needed: `pip install pyserial`
+
 **Actions:**
 ```bash
 python -m serial.tools.miniterm COM4 115200
@@ -178,7 +172,7 @@ Replace `COM4` with your actual COM port number.
 - AP mode startup: `KNOMI_AP_XXXXX`
 
 **To exit miniterm:**
-- Press `CTRL + ]` (or `CTRL + T` followed by `Q`)
+- Press `CTRL + T` followed by `Q`
 
 ---
 
@@ -189,7 +183,7 @@ Replace `COM4` with your actual COM port number.
 **Actions:**
 1. **Disconnect USB** from KNOMI
 2. **Connect to WiFi**: Look for `BTT-KNOMI` or `KNOMI_AP_XXXXX` network
-3. **Open browser**: Navigate to `http://192.168.4.1`
+3. **Open browser**: Navigate to `http://192.168.4.1` (or the IP shown in your WiFi settings)
 4. **Configure settings**:
    - **Klipper IP**: Enter your Klipper/Moonraker IP address
    - **Klipper Port**: Usually `80` (default)
