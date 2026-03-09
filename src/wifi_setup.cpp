@@ -374,11 +374,18 @@ void wifi_task(void * parameter) {
                             WiFi.begin(knomi_config.sta_ssid, knomi_config.sta_pwd);
                             wifi_status = WIFI_STATUS_CONNECTING;
                         } else {
-                            // After max attempts, switch to AP mode for user intervention
-                            Serial.println("Max reconnect attempts reached. Switching to AP mode.");
-                            strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
-                            knomi_config_require |= WEB_POST_WIFI_CONFIG_MODE;
+                            // After max attempts, switch to AP mode for user intervention.
+                            // We do NOT persist "ap" to EEPROM so the device retries STA
+                            // on next boot and the web UI can reconnect without re-entering credentials.
+                            Serial.println("Max reconnect attempts reached. Switching to AP mode (runtime only).");
                             reconnect_attempts = 0;
+                            WiFi.disconnect();
+                            WiFi.mode(WIFI_MODE_AP);
+                            WiFi.softAPConfig(ap_local_ip, ap_gateway, ap_subnet);
+                            WiFi.softAP(knomi_config.ap_ssid, knomi_config.ap_pwd);
+                            dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+                            strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
+                            wifi_status = WIFI_STATUS_ERROR;
                         }
                     }
                 }

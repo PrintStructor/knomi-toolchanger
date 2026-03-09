@@ -201,6 +201,18 @@ void webserver_setup(void) {
                 }
             }
         }
+        // If SSID param was submitted but credentials are unchanged (strcmp returned 0 above),
+        // still trigger a reconnect. This handles the case where the auto-reconnect logic
+        // temporarily switched to AP mode without changing stored credentials.
+        if (!(post_require & WEB_POST_WIFI_CONFIG_STA) && knomi_config.sta_ssid[0] != 0) {
+            for (int i = 0; i < paramsNr; i++) {
+                if (request->getParam(i)->name() == "ssid") {
+                    post_require |= WEB_POST_WIFI_CONFIG_STA;
+                    break;
+                }
+            }
+        }
+
         if ((post_require & WEB_POST_WIFI_CONFIG_STA)) {
             if (strcmp(knomi_config.mode, "ap") == 0) {
                 strlcpy(knomi_config.mode, "sta", sizeof(knomi_config.mode));
