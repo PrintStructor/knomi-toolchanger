@@ -81,9 +81,12 @@ bool MOONRAKER::post_to_queue(String path) {
     post_queue.count++;
 #ifdef MOONRAKER_DEBUG
     Serial.printf("\r\n\r\n ************ post queue *******************\r\n\r\n");
-    Serial.print("count: ");   Serial.println(post_queue.count);
-    Serial.print("index_w: "); Serial.println(post_queue.index_w);
-    Serial.print("queue: ");   Serial.println(path);
+    Serial.print("count: ");
+    Serial.println(post_queue.count);
+    Serial.print("index_w: ");
+    Serial.println(post_queue.index_w);
+    Serial.print("queue: ");
+    Serial.println(path);
     Serial.println("\r\n*******************************\r\n\r\n");
 #endif
     return true;
@@ -96,7 +99,7 @@ bool MOONRAKER::post_gcode_to_queue(String gcode) {
 
 void MOONRAKER::get_printer_ready(void) {
     bool was_unready = unready;
-    
+
     String webhooks = send_request("GET", "/printer/objects/query?webhooks");
     if (!webhooks.isEmpty()) {
         DynamicJsonDocument json_parse(webhooks.length() * 2);
@@ -107,7 +110,7 @@ void MOONRAKER::get_printer_ready(void) {
         Serial.print("unready: ");
         Serial.println(unready);
 #endif
-        
+
         // CRITICAL: When Klipper changes from unready → ready (e.g. after FIRMWARE_RESTART)
         // → Reset Klipper Idle Timer, otherwise display sleeps immediately!
         if (was_unready && !unready) {
@@ -189,6 +192,10 @@ void MOONRAKER::get_printer_info(void) {
         Serial.println(data.bed_actual);
         Serial.print("bed_target: ");
         Serial.println(data.bed_target);
+        Serial.print("my_tool_number: ");
+        Serial.println(my_tool_number);
+        Serial.print("my_extruder_name: ");
+        Serial.println(my_extruder_name);
         Serial.print("nozzle_actual: ");
         Serial.println(data.nozzle_actual);
         Serial.print("nozzle_target: ");
@@ -227,7 +234,15 @@ void MOONRAKER::get_progress(void) {
         }
         
         // Progress & File Path
-        data.progress = (uint8_t)(json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<double>() * 100 + 0.5f);
+        data.progress = (json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<float>());
+
+        // Reject malformed values before they reach the UI and ETA calculations.
+        if (data.progress < 0.0f) {
+            data.progress = 0.0f;
+        } else if (data.progress > 1.0f) {
+            data.progress = 1.0f;
+        }
+
         String path = json_parse["result"]["status"]["virtual_sdcard"]["file_path"].as<String>();
         strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path));  // strlcpy handles null-termination correctly
         
@@ -278,11 +293,11 @@ void MOONRAKER::get_progress(void) {
         for (int i = 0; i < 6; i++) {
             String extruder_name = (i == 0) ? "extruder" : "extruder" + String(i);
             JsonVariant ext_obj = json_parse["result"]["status"][extruder_name];
-            
+
             if (!ext_obj.isNull()) {
                 double temp = ext_obj["temperature"].as<double>();
                 data.extruder_temps[i] = (int16_t)(temp + 0.5f);
-                
+
                 // Sanity check
                 if (data.extruder_temps[i] < 0 || data.extruder_temps[i] > 500) {
                     data.extruder_temps[i] = 0;
@@ -292,10 +307,10 @@ void MOONRAKER::get_progress(void) {
                 data.extruder_temps[i] = 0;
             }
         }
-        
+
 #ifdef MOONRAKER_DEBUG
         Serial.print("progress: ");
-        Serial.println(data.progress);
+        Serial.printf("%.6f\n", data.progress);
         Serial.print("path: ");
         Serial.println(data.file_path);
         Serial.print("current_layer: ");
@@ -373,14 +388,13 @@ void MOONRAKER::http_get_loop(void) {
         // but printing flag has not refresh
         get_knomi_status();
         get_printer_info();
-        get_idle_timeout();  // Update idle_timeout state for display sleep management
+        get_idle_timeout(); // Update idle_timeout state for display sleep management
         if (data.printing) {
             get_progress();
         }
     }
     data_unlock = true;
 }
-
 
 MOONRAKER moonraker;
 
@@ -397,7 +411,7 @@ extern "C" void knomi_request_cancel(void) {
 }
 
 void moonraker_post_task(void * parameter) {
-    for(;;) {
+    for (;;) {
         moonraker.http_post_loop();
         delay(500);
     }
@@ -406,13 +420,13 @@ void moonraker_post_task(void * parameter) {
 void moonraker_task(void * parameter) {
 
     xTaskCreate(moonraker_post_task, "moonraker post",
-        4096,  // Stack size (bytes)
-        NULL,  // Parameter to pass
-        8,     // Task priority
-        NULL   // Task handle
-        );
+                4096, // Stack size (bytes)
+                NULL, // Parameter to pass
+                8, // Task priority
+                NULL // Task handle
+    );
 
-    for(;;) {
+    for (;;) {
         if (wifi_get_connect_status() == WIFI_STATUS_CONNECTED) {
             moonraker.http_get_loop();
         }
