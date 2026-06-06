@@ -4,7 +4,11 @@
 #include "knomi.h"
 #include "power_management/display_sleep.h"
 
-//#define MOONRAKER_DEBUG  // Enable for layer debug
+// Hostname-based tool detection already used by the tool-specific display logic.
+// This lets the legacy nozzle-temp fields follow the physical KNOMI screen.
+extern int detect_my_tool_number(void);
+
+// #define MOONRAKER_DEBUG  // Enable for layer debug
 
 void lv_popup_warning(const char * warning, bool clickable);
 
@@ -77,9 +81,12 @@ bool MOONRAKER::post_to_queue(String path) {
     post_queue.count++;
 #ifdef MOONRAKER_DEBUG
     Serial.printf("\r\n\r\n ************ post queue *******************\r\n\r\n");
-    Serial.print("count: ");   Serial.println(post_queue.count);
-    Serial.print("index_w: "); Serial.println(post_queue.index_w);
-    Serial.print("queue: ");   Serial.println(path);
+    Serial.print("count: ");
+    Serial.println(post_queue.count);
+    Serial.print("index_w: ");
+    Serial.println(post_queue.index_w);
+    Serial.print("queue: ");
+    Serial.println(path);
     Serial.println("\r\n*******************************\r\n\r\n");
 #endif
     return true;
@@ -92,7 +99,7 @@ bool MOONRAKER::post_gcode_to_queue(String gcode) {
 
 void MOONRAKER::get_printer_ready(void) {
     bool was_unready = unready;
-    
+
     String webhooks = send_request("GET", "/printer/objects/query?webhooks");
     if (!webhooks.isEmpty()) {
         DynamicJsonDocument json_parse(webhooks.length() * 2);
@@ -103,7 +110,7 @@ void MOONRAKER::get_printer_ready(void) {
         Serial.print("unready: ");
         Serial.println(unready);
 #endif
-        
+
         // CRITICAL: When Klipper changes from unready → ready (e.g. after FIRMWARE_RESTART)
         // → Reset Klipper Idle Timer, otherwise display sleeps immediately!
         if (was_unready && !unready) {
@@ -116,28 +123,79 @@ void MOONRAKER::get_printer_ready(void) {
 }
 
 void MOONRAKER::get_printer_info(void) {
-    String printer_info = send_request("GET", "/api/printer");
+    // Query the actual Klipper objects instead of the legacy /api/printer endpoint.
+    // This keeps the original nozzle-temp graphic tied to the same extruder objects
+    // used by the working graph/progress path.
+    String printer_info = send_request(
+        "GET",
+        "/printer/objects/query?print_stats&heater_bed&extruder&extruder1&extruder2&extruder3&extruder4&extruder5");
+
     if (!printer_info.isEmpty()) {
         DynamicJsonDocument json_parse(printer_info.length() * 2);
-        deserializeJson(json_parse, printer_info);
-        data.pause = json_parse["state"]["flags"]["pausing"].as<bool>(); // pausing
-        data.pause |= json_parse["state"]["flags"]["paused"].as<bool>(); // paused
-        data.printing = json_parse["state"]["flags"]["printing"].as<bool>(); // printing
-        data.printing |= json_parse["state"]["flags"]["cancelling"].as<bool>(); // cancelling
-        data.printing |= data.pause; // pause
-        data.bed_actual = int16_t(json_parse["temperature"]["bed"]["actual"].as<double>() + 0.5f);
-        data.bed_target = int16_t(json_parse["temperature"]["bed"]["target"].as<double>() + 0.5f);
-        data.nozzle_actual = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["actual"].as<double>() + 0.5f);
-        data.nozzle_target = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["target"].as<double>() + 0.5f);
+        DeserializationError error = deserializeJson(json_parse, printer_info);
+
+        if (error) {
+            Serial.println("JSON parse error in get_printer_info");
+            return;
+        }
+
+        JsonObject status = json_parse["result"]["status"];
+
+        // Use print_stats state from the same Moonraker object API used elsewhere.
+        String print_state = status["print_stats"]["state"].as<String>();
+
+        data.pause = (print_state == "paused");
+        data.printing = (print_state == "printing");
+        data.printing |= (print_state == "pausing");
+        data.printing |= (print_state == "cancelling");
+        data.printing |= data.pause;
+
+        // Bed object name in Klipper's object API is heater_bed.
+        JsonVariant bed = status["heater_bed"];
+
+        if (!bed.isNull()) {
+            data.bed_actual = int16_t(bed["temperature"].as<double>() + 0.5f);
+            data.bed_target = int16_t(bed["target"].as<double>() + 0.5f);
+        } else {
+            data.bed_actual = 0;
+            data.bed_target = 0;
+        }
+
+        // Match this physical KNOMI to its hostname tool number:
+        // knomi-t0 -> extruder, knomi-t1 -> extruder1, etc.
+        int my_tool_number = detect_my_tool_number();
+
+        if (my_tool_number < 0 || my_tool_number > 5) {
+            my_tool_number = 0;
+        }
+
+        String my_extruder_name = (my_tool_number == 0) ? "extruder" : "extruder" + String(my_tool_number);
+        JsonVariant my_ext = status[my_extruder_name];
+
+        if (!my_ext.isNull()) {
+            // These are the legacy fields used by the original nozzle-temp graphic.
+            data.nozzle_actual = int16_t(my_ext["temperature"].as<double>() + 0.5f);
+            data.nozzle_target = int16_t(my_ext["target"].as<double>() + 0.5f);
+        } else {
+            // Missing object means the firmware's tool name map does not match Klipper.
+            data.nozzle_actual = 0;
+            data.nozzle_target = 0;
+        }
+
 #ifdef MOONRAKER_DEBUG
         Serial.print("unready: ");
         Serial.println(unready);
+
         Serial.print("printing: ");
         Serial.println(data.printing);
         Serial.print("bed_actual: ");
         Serial.println(data.bed_actual);
         Serial.print("bed_target: ");
         Serial.println(data.bed_target);
+        Serial.print("my_tool_number: ");
+        Serial.println(my_tool_number);
+        Serial.print("my_extruder_name: ");
+        Serial.println(my_extruder_name);
         Serial.print("nozzle_actual: ");
         Serial.println(data.nozzle_actual);
         Serial.print("nozzle_target: ");
@@ -176,7 +234,15 @@ void MOONRAKER::get_progress(void) {
         }
         
         // Progress & File Path
-        data.progress = (uint8_t)(json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<double>() * 100 + 0.5f);
+        data.progress = (json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<float>());
+
+        // Reject malformed values before they reach the UI and ETA calculations.
+        if (data.progress < 0.0f) {
+            data.progress = 0.0f;
+        } else if (data.progress > 1.0f) {
+            data.progress = 1.0f;
+        }
+
         String path = json_parse["result"]["status"]["virtual_sdcard"]["file_path"].as<String>();
         strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path));  // strlcpy handles null-termination correctly
         
@@ -227,11 +293,11 @@ void MOONRAKER::get_progress(void) {
         for (int i = 0; i < 6; i++) {
             String extruder_name = (i == 0) ? "extruder" : "extruder" + String(i);
             JsonVariant ext_obj = json_parse["result"]["status"][extruder_name];
-            
+
             if (!ext_obj.isNull()) {
                 double temp = ext_obj["temperature"].as<double>();
                 data.extruder_temps[i] = (int16_t)(temp + 0.5f);
-                
+
                 // Sanity check
                 if (data.extruder_temps[i] < 0 || data.extruder_temps[i] > 500) {
                     data.extruder_temps[i] = 0;
@@ -241,10 +307,10 @@ void MOONRAKER::get_progress(void) {
                 data.extruder_temps[i] = 0;
             }
         }
-        
+
 #ifdef MOONRAKER_DEBUG
         Serial.print("progress: ");
-        Serial.println(data.progress);
+        Serial.printf("%.6f\n", data.progress);
         Serial.print("path: ");
         Serial.println(data.file_path);
         Serial.print("current_layer: ");
@@ -322,14 +388,13 @@ void MOONRAKER::http_get_loop(void) {
         // but printing flag has not refresh
         get_knomi_status();
         get_printer_info();
-        get_idle_timeout();  // Update idle_timeout state for display sleep management
+        get_idle_timeout(); // Update idle_timeout state for display sleep management
         if (data.printing) {
             get_progress();
         }
     }
     data_unlock = true;
 }
-
 
 MOONRAKER moonraker;
 
@@ -346,7 +411,7 @@ extern "C" void knomi_request_cancel(void) {
 }
 
 void moonraker_post_task(void * parameter) {
-    for(;;) {
+    for (;;) {
         moonraker.http_post_loop();
         delay(500);
     }
@@ -355,13 +420,13 @@ void moonraker_post_task(void * parameter) {
 void moonraker_task(void * parameter) {
 
     xTaskCreate(moonraker_post_task, "moonraker post",
-        4096,  // Stack size (bytes)
-        NULL,  // Parameter to pass
-        8,     // Task priority
-        NULL   // Task handle
-        );
+                4096, // Stack size (bytes)
+                NULL, // Parameter to pass
+                8, // Task priority
+                NULL // Task handle
+    );
 
-    for(;;) {
+    for (;;) {
         if (wifi_get_connect_status() == WIFI_STATUS_CONNECTED) {
             moonraker.http_get_loop();
         }

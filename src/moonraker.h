@@ -26,7 +26,7 @@ typedef struct {
     
     // All extruder temperatures (for multi-tool displays)
     int16_t extruder_temps[6];         // °C, rounded for extruder0-5
-    uint8_t progress;
+    float progress;                    // maintain the decimal for better accuracy
     char file_path[32];
     
     // Layer & Time data for Print Progress Screen

@@ -313,12 +313,9 @@ void lv_loop_moonraker_change_screen(void) {
     // PRIORITY 2: PRINTING STATE
     // Only check this AFTER all preparation states
     // ========================================================================
+    // print_stats state is authoritative and already includes paused,
+    // pausing, and cancelling states through moonraker.data.printing.
     bool is_printing = moonraker.data.printing;
-    // Fallbacks: if moonraker.cpp filled these, treat tiny progress as printing
-    if (!is_printing) {
-        float p = moonraker.data.progress;
-        if (p <= 1.01f && p > 0.001f) is_printing = true;
-    }
 
     if (is_printing) {
         // Reset Print Complete state when new print starts
@@ -340,9 +337,7 @@ void lv_loop_moonraker_change_screen(void) {
     // If we were printing but stopped without completion, go back to IDLE
     // ========================================================================
     if (!is_printing && lv_screen_state == LV_MOONRAKER_STATE_PRINTING) {
-        int progress_percent = moonraker.data.progress;
-        if (progress_percent < 0) progress_percent = 0;
-        if (progress_percent > 100) progress_percent = 100;
+        int progress_percent = to_percent(moonraker.data.progress);
         
         // Check if print was cancelled/failed (not completed)
         // Use 95% threshold as many slicers don't report exactly 100%
@@ -366,9 +361,7 @@ void lv_loop_moonraker_change_screen(void) {
     // PRIORITY 2.5: PRINT COMPLETE STATE
     // Show completion screen for 10 seconds after print finishes
     // ========================================================================
-    int progress_percent = moonraker.data.progress;
-    if (progress_percent < 0) progress_percent = 0;
-    if (progress_percent > 100) progress_percent = 100;
+    int progress_percent = to_percent(moonraker.data.progress);
     
     // Show Print Complete screen only ONCE per print and for limited time
     // Use 95% threshold as many slicers don't report exactly 100%
@@ -437,81 +430,160 @@ void lv_loop_moonraker_change_screen_value(void) {
     // PRINT PROGRESS UPDATE (only when Printing Screen is active)
     // ========================================================================
     if (lv_scr_act() == ui_ScreenPrinting) {
-        // Progress Percent (0-100) - moonraker.data.progress is already in percent!
-        int progress_percent = moonraker.data.progress;  // Use directly, do NOT use to_percent()!
-        if (progress_percent < 0) progress_percent = 0;
-        if (progress_percent > 100) progress_percent = 100;
-        
-        // Layer Info
-        int current_layer = moonraker.data.current_layer;
-        int total_layers = moonraker.data.total_layers;
-        
-        // ETA Calculation - Progress-Based with Progressive Buffer
-        // Uses increasing buffer as print progresses to account for end-phase variations
+        // Moonraker supplies virtual-SD progress as a 0.0-1.0 ratio.
+        // Convert it to a whole percentage only for visual display.
+        const float progress_ratio = moonraker.data.progress;
+        const int progress_percent = to_percent(progress_ratio);
+
+        // Layer information comes directly from print_stats.
+        const int current_layer = moonraker.data.current_layer;
+        const int total_layers = moonraker.data.total_layers;
+
+        // ====================================================================
+        // Smoothed file-progress ETA
+        //
+        // Estimated total print duration:
+        //
+        //     estimated total = elapsed printing time / fractional progress
+        //
+        // The total-time estimate is updated only when G-code file progress
+        // advances. This prevents toolchanges, wipes, purge macros, and other
+        // long commands from making the ETA increase on every Moonraker poll.
+        //
+        // Remaining time continues counting downward between progress samples.
+        // ====================================================================
+        static float smoothed_total_time = 0.0f;
+        static float last_sample_progress = 0.0f;
+        static int32_t previous_print_duration = 0;
+
+        const int32_t print_duration = moonraker.data.print_duration;
         int32_t eta_seconds = 0;
-        
-        if (progress_percent >= 100) {
-            // Print complete
+
+        // A lower duration or substantial backward progress indicates that
+        // Klipper started a new print or reset its print statistics.
+        const bool estimate_reset =
+            print_duration < previous_print_duration ||
+            progress_ratio + 0.01f < last_sample_progress;
+
+        if (estimate_reset) {
+            smoothed_total_time = 0.0f;
+            last_sample_progress = 0.0f;
+        }
+
+        previous_print_duration = print_duration;
+
+        if (progress_ratio >= 1.0f) {
+            // Print is complete.
             eta_seconds = 0;
-        } else if (progress_percent < 2) {
-            // At print start (0-1%), no valid data yet for calculation
-            // Use special value -1 to indicate "calculating" state
+
+        } else if (progress_ratio < 0.02f || print_duration <= 0) {
+            // Startup heating, purging, homing, and other preparation work make
+            // a live elapsed/progress estimate unreliable during the first 2%.
             eta_seconds = -1;
-        } else if (progress_percent > 0 && moonraker.data.print_duration > 0) {
-            // Calculate base ETA from progress
-            float progress_ratio = (float)progress_percent / 100.0f;
-            float estimated_total_time = (float)moonraker.data.print_duration / progress_ratio;
-            float base_eta = estimated_total_time - (float)moonraker.data.print_duration;
-            
-            // Progressive buffer system:
-            // 15-50%: 3% buffer (print is consistent)
-            // 50-80%: 5% buffer (moderate variations)
-            // 80-100%: 7% buffer (end-phase slowdowns, retractions, cooling)
-            float buffer_factor = 1.03f;  // Default 3%
-            
-            if (progress_percent >= 80) {
-                buffer_factor = 1.07f;  // 7% buffer for final phase
-            } else if (progress_percent >= 50) {
-                buffer_factor = 1.05f;  // 5% buffer for mid-late phase
-            }
-            // else: 3% buffer for early-mid phase (15-50%)
-            
-            eta_seconds = (int32_t)(base_eta * buffer_factor);
-            
-            if (eta_seconds < 0) eta_seconds = 0;
+
         } else {
-            // No valid progress data available
-            eta_seconds = 0;
+            // Resample after progress advances by 0.05 percentage points.
+            // During stationary file progress, preserve the estimated total
+            // while remaining time continues counting down.
+            const float minimum_progress_step = 0.0005f;
+
+            const bool progress_advanced =
+                progress_ratio >= last_sample_progress + minimum_progress_step;
+
+            if (smoothed_total_time <= 0.0f || progress_advanced) {
+                const float instantaneous_total_time =
+                    (float)print_duration / progress_ratio;
+
+                if (smoothed_total_time <= 0.0f) {
+                    // Seed the filter using the first valid progress sample.
+                    smoothed_total_time = instantaneous_total_time;
+
+                } else {
+                    // Stronger smoothing is used early because small progress
+                    // changes produce large swings in projected total time.
+                    float smoothing_alpha = 0.08f;
+
+                    if (progress_ratio >= 0.50f) {
+                        smoothing_alpha = 0.25f;
+                    } else if (progress_ratio >= 0.10f) {
+                        smoothing_alpha = 0.15f;
+                    }
+
+                    smoothed_total_time +=
+                        smoothing_alpha *
+                        (instantaneous_total_time - smoothed_total_time);
+                }
+
+                last_sample_progress = progress_ratio;
+            }
+
+            eta_seconds =
+                (int32_t)(smoothed_total_time - (float)print_duration);
+
+            if (eta_seconds < 0) {
+                eta_seconds = 0;
+            }
         }
-        
-        // EXTENDED DEBUG: Output every 10 updates (~10 seconds) for better tracking
+
+        // Periodic diagnostics for comparing KNOMI with Mainsail/KlipperScreen.
         static int debug_counter = 0;
+
         if (debug_counter++ % 10 == 0) {
-            Serial.printf("[ETA DEBUG] print_duration: %d, progress: %d%%, calculated eta_seconds: %d\n",
-                (int)moonraker.data.print_duration, progress_percent, eta_seconds);
-            
-            // Show what will be displayed
-            int hours = eta_seconds / 3600;
-            int minutes = (eta_seconds % 3600) / 60;
-            Serial.printf("[ETA DEBUG] Display will show: %dh %dm\n", hours, minutes);
+            Serial.printf(
+                "[ETA DEBUG] duration=%d progress=%.4f (%d%%) total=%.0f eta=%d\n",
+                (int)print_duration,
+                progress_ratio,
+                progress_percent,
+                smoothed_total_time,
+                (int)eta_seconds
+            );
+
+            if (eta_seconds >= 0) {
+                const int hours = eta_seconds / 3600;
+                const int minutes = (eta_seconds % 3600) / 60;
+
+                Serial.printf(
+                    "[ETA DEBUG] Display will show: %dh %dm\n",
+                    hours,
+                    minutes
+                );
+            } else {
+                Serial.println(
+                    "[ETA DEBUG] Display will show: calculating"
+                );
+            }
         }
-        
-        // Get this display's tool number
-        int my_tool_number = detect_my_tool_number();
-        
-        // Use temperature of THIS display's tool, not the active tool
+
+        // Determine which physical tool this KNOMI display belongs to.
+        const int my_tool_number = detect_my_tool_number();
+
+        // Show the temperature belonging to this display's physical tool,
+        // rather than always showing the currently active extruder.
         int16_t my_tool_temp = 0;
+
         if (my_tool_number >= 0 && my_tool_number < 6) {
-            my_tool_temp = moonraker.data.extruder_temps[my_tool_number];
+            my_tool_temp =
+                moonraker.data.extruder_temps[my_tool_number];
         }
-        
-        // Debug output
+
         static int temp_debug_counter = 0;
+
         if (temp_debug_counter++ % 30 == 0) {
-            Serial.printf("[Tool Temp] Display Tool #%d: %d°C\n", my_tool_number, my_tool_temp);
+            Serial.printf(
+                "[Tool Temp] Display Tool #%d: %d°C\n",
+                my_tool_number,
+                my_tool_temp
+            );
         }
-        
-        // Call update function with tool-specific temperature
-        update_print_progress(progress_percent, current_layer, total_layers, eta_seconds, my_tool_number, my_tool_temp);
+
+        // Push all calculated values into the active progress-screen widgets.
+        update_print_progress(
+            progress_percent,
+            current_layer,
+            total_layers,
+            eta_seconds,
+            my_tool_number,
+            my_tool_temp
+        );
     }
 }
